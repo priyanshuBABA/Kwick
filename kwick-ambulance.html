@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kwick Ambulance Service</title>
+    <!-- Google Fonts: Nunito -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- React and Babel CDNs -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #f5f5f5;
+            color: #1A1A1A;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        #root {
+            width: 100%;
+            background-color: #f5f5f5;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Fixed elements spanning full width */
+        .fixed-bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background-color: white;
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 0;
+            border-top: '1px solid #eee';
+            z-index: 100;
+        }
+
+        /* Animations */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(229, 57, 53, 0.4); }
+            50% { transform: scale(1.06); box-shadow: 0 0 0 10px rgba(229, 57, 53, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(229, 57, 53, 0); }
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .fade-up {
+            animation: fadeUp 0.35s ease forwards;
+        }
+
+        .pulse {
+            animation: pulse 1.8s infinite;
+        }
+
+        .blink {
+            animation: blink 1s infinite;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 0px;
+        }
+
+        /* Utility */
+        .card-hover:hover {
+            border: 2px solid #FFD700 !important;
+            transform: translateY(-2px);
+            transition: all 0.2s ease;
+        }
+
+        button:active {
+            transform: scale(0.96);
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useMemo } = React;
+
+        // Constants
+        const COLORS = {
+            primary: '#FFD700',
+            accent: '#E53935',
+            bg: '#f5f5f5',
+            card: '#ffffff',
+            text: '#1A1A1A',
+            muted: '#666',
+            success: '#4CAF50'
+        };
+
+        const AMBULANCE_TYPES = [
+            { id: 'bls', type: 'BLS', name: 'Basic Life Support', icon: '🚑', desc: 'Accidents, fever, general emergencies', price: 299, tag: 'Most Booked', tagColor: '#E8F5E9', tagText: '#2E7D32' },
+            { id: 'als', type: 'ALS', name: 'Advanced Life Support', icon: '🏥', desc: 'ICU on wheels — Ventilator & Oxygen', price: 599, tag: 'ICU Ready', tagColor: '#E3F2FD', tagText: '#1565C0' },
+            { id: 'pt', type: 'PT', name: 'Patient Transport', icon: '🛻', desc: 'Non-emergency hospital transfer', price: 199, tag: 'Affordable', tagColor: '#F3E5F5', tagText: '#7B1FA2' }
+        ];
+
+        const HOSPITALS = [
+            { id: 'h1', name: 'AIIMS Bhopal', dist: '1.2 km', rating: '4.8' },
+            { id: 'h2', name: 'Hamidia Hospital', dist: '2.5 km', rating: '4.5' },
+            { id: 'h3', name: 'Apollo Hospital', dist: '3.8 km', rating: '4.7' },
+            { id: 'h4', name: 'Bansal Hospital', dist: '4.1 km', rating: '4.6' }
+        ];
+
+        const MEDICAL_CONDITIONS = ['Heart Attack', 'Road Accident', 'Stroke', 'Difficulty Breathing', 'Unconscious', 'Fracture', 'Burn', 'Other'];
+
+        // --- COMPONENTS ---
+
+        const SOSButton = () => (
+            <a href="tel:108" style={{
+                position: 'fixed',
+                bottom: '90px',
+                right: '18px',
+                zIndex: 999,
+                backgroundColor: COLORS.accent,
+                width: '60px',
+                height: '60px',
+                borderRadius: '50%',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'white',
+                textDecoration: 'none',
+                fontWeight: '800',
+                fontSize: '12px'
+            }} className="pulse">
+                <span style={{ fontSize: '24px' }}>🆘</span>
+                <span>SOS</span>
+            </a>
+        );
+
+        const Header = ({ title, subtitle, showBack, onBack }) => (
+            <div style={{
+                position: 'sticky',
+                top: 0,
+                zIndex: 100,
+                backgroundColor: COLORS.primary,
+                padding: '16px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+            }}>
+                {showBack && (
+                    <button onClick={onBack} style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer' }}>
+                        ←
+                    </button>
+                )}
+                <div>
+                    <h1 style={{ fontSize: '20px', fontWeight: '900' }}>{title}</h1>
+                    <p style={{ fontSize: '13px', fontWeight: '600', opacity: 0.8 }}>{subtitle}</p>
+                </div>
+            </div>
+        );
+
+        const BottomNav = ({ activeTab, onTabChange }) => {
+            const tabs = [
+                { id: 'home', label: 'HOME', icon: '🏠' },
+                { id: 'orders', label: 'ORDERS', icon: '📦' },
+                { id: 'services', label: 'SERVICES', icon: '⚡' },
+                { id: 'profile', label: 'PROFILE', icon: '👤' }
+            ];
+
+            return (
+                <div style={{
+                    position: 'fixed',
+                    bottom: 0,
+                    width: '100%',
+                    backgroundColor: 'white',
+                    display: 'flex',
+                    justifyContent: 'space-around',
+                    padding: '12px 0',
+                    borderTop: '1px solid #eee',
+                    zIndex: 100
+                }}>
+                    {tabs.map(tab => (
+                        <div 
+                            key={tab.id}
+                            onClick={() => onTabChange(tab.id)}
+                            style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                cursor: 'pointer',
+                                color: activeTab === tab.id ? COLORS.primary : '#999',
+                                transition: 'color 0.2s'
+                            }}
+                        >
+                            <span style={{ fontSize: '20px' }}>{tab.icon}</span>
+                            <span style={{ fontSize: '10px', fontWeight: '800', marginTop: '4px' }}>{tab.label}</span>
+                        </div>
+                    ))}
+                </div>
+            );
+        };
+
+        // --- VIEWS ---
+
+        const HomeView = ({ onNavigateToAmbulance }) => (
+            <div style={{ padding: '16px' }}>
+                <Header title="Kwick Services" subtitle="Hyperlocal delivery & emergency" />
+                
+                {/* Hero Section */}
+                <div className="fade-up" style={{ 
+                    backgroundColor: COLORS.primary, 
+                    borderRadius: '20px', 
+                    padding: '24px', 
+                    marginBottom: '24px',
+                    marginTop: '16px',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center'
+                }}>
+                    <div>
+                        <h2 style={{ fontSize: '24px', fontWeight: '900' }}>Fast & Reliable</h2>
+                        <p style={{ fontWeight: '700', opacity: 0.8 }}>Services at your doorstep</p>
+                    </div>
+                    <span style={{ fontSize: '48px' }}>⚡</span>
+                </div>
+
+                <h3 style={{ fontSize: '18px', fontWeight: '800', marginBottom: '16px' }}>Our Services</h3>
+                
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                    {/* Doctor Card */}
+                    <div className="fade-up card-hover" style={{
+                        backgroundColor: 'white',
+                        borderRadius: '16px',
+                        padding: '20px',
+                        textAlign: 'center',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+                        cursor: 'pointer',
+                        animationDelay: '0.1s'
+                    }}>
+                        <div style={{ fontSize: '40px', marginBottom: '12px' }}>👨‍⚕️</div>
+                        <h4 style={{ fontWeight: '800' }}>Doctor</h4>
+                        <p style={{ fontSize: '11px', color: COLORS.muted }}>Consultation</p>
+                    </div>
+
+                    {/* Ambulance Card */}
+                    <div 
+                        className="fade-up card-hover" 
+                        onClick={onNavigateToAmbulance}
+                        style={{
+                            backgroundColor: 'white',
+                            borderRadius: '16px',
+                            padding: '20px',
+                            textAlign: 'center',
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+                            cursor: 'pointer',
+                            animationDelay: '0.2s',
+                            border: `2px solid ${COLORS.primary}`
+                        }}
+                    >
+                        <div style={{ fontSize: '40px', marginBottom: '12px' }}>🚑</div>
+                        <h4 style={{ fontWeight: '800' }}>Ambulance</h4>
+                        <p style={{ fontSize: '11px', color: COLORS.muted }}>Emergency</p>
+                    </div>
+                </div>
+
+                <div className="fade-up" style={{ marginTop: '32px', animationDelay: '0.3s' }}>
+                    <h3 style={{ fontSize: '16px', fontWeight: '800', marginBottom: '12px' }}>Nearby Offers</h3>
+                    <div style={{ backgroundColor: '#fff', borderRadius: '16px', padding: '16px', display: 'flex', gap: '12px', alignItems: 'center' }}>
+                        <div style={{ backgroundColor: '#FFF9C4', padding: '10px', borderRadius: '12px' }}>🎁</div>
+                        <div>
+                            <p style={{ fontWeight: '800', fontSize: '14px' }}>First Aid Kit Free!</p>
+                            <p style={{ fontSize: '11px', color: COLORS.muted }}>On your first ambulance booking</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+
+        const Placeholder = ({ title, icon }) => (
+            <div style={{ padding: '40px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', marginTop: '60px' }}>
+                <span style={{ fontSize: '64px' }}>{icon}</span>
+                <h2 style={{ fontSize: '24px', fontWeight: '800' }}>{title}</h2>
+                <p style={{ color: COLORS.muted }}>This feature is coming soon to the Kwick app. Stay tuned!</p>
+            </div>
+        );
+
+        // --- AMBULANCE FLOW PAGES ---
+
+        const PageA = ({ onSelect }) => (
+            <div style={{ padding: '16px', paddingBottom: '100px' }}>
+                {/* Emergency Banner */}
+                <div style={{ 
+                    backgroundColor: COLORS.accent, 
+                    borderRadius: '12px', 
+                    padding: '16px', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'space-between',
+                    marginBottom: '20px',
+                    color: 'white'
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span className="blink" style={{ fontSize: '24px' }}>🚨</span>
+                        <div>
+                            <p style={{ fontWeight: '800', fontSize: '14px' }}>Emergency?</p>
+                            <p style={{ fontSize: '12px', opacity: 0.9 }}>Available 24/7</p>
+                        </div>
+                    </div>
+                    <a href="tel:108" style={{
+                        backgroundColor: 'white',
+                        color: COLORS.accent,
+                        padding: '8px 16px',
+                        borderRadius: '20px',
+                        textDecoration: 'none',
+                        fontWeight: '900',
+                        fontSize: '14px'
+                    }}>CALL 108</a>
+                </div>
+
+                <h2 style={{ fontSize: '18px', fontWeight: '800', marginBottom: '16px' }}>Choose Ambulance Type</h2>
+                
+                {AMBULANCE_TYPES.map((service, index) => (
+                    <div 
+                        key={service.id}
+                        className="fade-up card-hover"
+                        onClick={() => onSelect(service)}
+                        style={{
+                            backgroundColor: 'white',
+                            borderRadius: '16px',
+                            padding: '16px',
+                            marginBottom: '16px',
+                            display: 'flex',
+                            gap: '16px',
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+                            cursor: 'pointer',
+                            animationDelay: `${index * 0.08}s`,
+                            position: 'relative',
+                            border: '2px solid transparent'
+                        }}
+                    >
+                        <div style={{
+                            width: '60px',
+                            height: '60px',
+                            backgroundColor: COLORS.primary,
+                            borderRadius: '50%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '32px'
+                        }}>
+                            {service.icon}
+                        </div>
+                        <div style={{ flex: 1 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                                <h3 style={{ fontWeight: '800', fontSize: '16px' }}>{service.type}</h3>
+                                <span style={{ 
+                                    backgroundColor: service.tagColor, 
+                                    color: service.tagText, 
+                                    fontSize: '10px', 
+                                    padding: '2px 8px', 
+                                    borderRadius: '10px', 
+                                    fontWeight: '700' 
+                                }}>{service.tag}</span>
+                            </div>
+                            <p style={{ fontSize: '12px', color: COLORS.muted, marginBottom: '8px' }}>{service.desc}</p>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <span style={{ color: COLORS.accent, fontWeight: '900', fontSize: '18px' }}>₹{service.price}</span>
+                                <button style={{ 
+                                    backgroundColor: COLORS.primary, 
+                                    border: 'none', 
+                                    padding: '6px 12px', 
+                                    borderRadius: '8px', 
+                                    fontWeight: '800', 
+                                    fontSize: '12px' 
+                                }}>Book →</button>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+
+                <div style={{ backgroundColor: '#fff', borderRadius: '16px', padding: '16px', marginTop: '24px' }}>
+                    <h4 style={{ fontWeight: '800', marginBottom: '12px' }}>Why Kwick Ambulance?</h4>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                        {[
+                            { icon: '⚡', text: 'Under 8 min avg. response' },
+                            { icon: '💳', text: 'Pay Later at Hospital' },
+                            { icon: '📍', text: 'Live GPS tracking' },
+                            { icon: '👨‍⚕️', text: 'Trained paramedic' }
+                        ].map((item, i) => (
+                            <div key={i} style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                <span>{item.icon}</span>
+                                <span style={{ fontSize: '11px', fontWeight: '600' }}>{item.text}</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        );
+
+        const PageB = ({ service, onConfirm, onBack }) => {
+            const [dropMode, setDropMode] = useState('nearest');
+            const [selectedHospital, setSelectedHospital] = useState(null);
+            const [condition, setCondition] = useState('');
+            const [notes, setNotes] = useState('');
+
+            const canConfirm = dropMode === 'nearest' || selectedHospital !== null;
+
+            return (
+                <div style={{ padding: '16px', paddingBottom: '120px' }}>
+                    {/* Pickup Card */}
+                    <div className="fade-up" style={{ backgroundColor: 'white', borderRadius: '16px', padding: '16px', marginBottom: '16px' }}>
+                        <h4 style={{ fontSize: '14px', fontWeight: '800', marginBottom: '12px' }}>Pickup Location</h4>
+                        <div style={{ 
+                            backgroundColor: '#FFFDE7', 
+                            padding: '12px', 
+                            borderRadius: '12px', 
+                            display: 'flex', 
+                            gap: '8px', 
+                            alignItems: 'center',
+                            border: '1px solid #FFF59D'
+                        }}>
+                            <span>📍</span>
+                            <span style={{ fontSize: '13px', fontWeight: '700' }}>Munger Fort, Bhopal (Current)</span>
+                        </div>
+                        <button style={{ 
+                            background: 'none', 
+                            border: 'none', 
+                            color: COLORS.muted, 
+                            fontSize: '12px', 
+                            fontWeight: '700', 
+                            marginTop: '8px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px'
+                        }}>✏️ Change Pickup Location</button>
+                    </div>
+
+                    {/* Drop Location Card */}
+                    <div className="fade-up" style={{ backgroundColor: 'white', borderRadius: '16px', padding: '16px', marginBottom: '16px', animationDelay: '0.08s' }}>
+                        <h4 style={{ fontSize: '14px', fontWeight: '800', marginBottom: '12px' }}>Hospital / Drop Location</h4>
+                        <div style={{ display: 'flex', gap: '10px', marginBottom: '16px' }}>
+                            <button 
+                                onClick={() => setDropMode('nearest')}
+                                style={{
+                                    flex: 1,
+                                    padding: '10px',
+                                    borderRadius: '10px',
+                                    border: dropMode === 'nearest' ? `2px solid ${COLORS.primary}` : '1px solid #eee',
+                                    backgroundColor: dropMode === 'nearest' ? '#FFFBE6' : 'white',
+                                    fontWeight: '800',
+                                    fontSize: '12px',
+                                    transition: 'all 0.2s'
+                                }}
+                            >🎯 Nearest Hospital</button>
+                            <button 
+                                onClick={() => setDropMode('choose')}
+                                style={{
+                                    flex: 1,
+                                    padding: '10px',
+                                    borderRadius: '10px',
+                                    border: dropMode === 'choose' ? `2px solid ${COLORS.primary}` : '1px solid #eee',
+                                    backgroundColor: dropMode === 'choose' ? '#FFFBE6' : 'white',
+                                    fontWeight: '800',
+                                    fontSize: '12px',
+                                    transition: 'all 0.2s'
+                                }}
+                            >🔍 I'll Choose</button>
+                        </div>
+
+                        {dropMode === 'nearest' ? (
+                            <div style={{ backgroundColor: '#E8F5E9', padding: '8px 12px', borderRadius: '8px', display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                <span style={{ fontSize: '14px' }}>✅</span>
+                                <span style={{ fontSize: '12px', fontWeight: '700', color: '#2E7D32' }}>Will auto-select nearest available hospital</span>
+                            </div>
+                        ) : (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                {HOSPITALS.map(h => (
+                                    <div 
+                                        key={h.id}
+                                        onClick={() => setSelectedHospital(h)}
+                                        style={{
+                                            padding: '12px',
+                                            borderRadius: '10px',
+                                            border: selectedHospital?.id === h.id ? `2px solid ${COLORS.primary}` : '1px solid #eee',
+                                            backgroundColor: selectedHospital?.id === h.id ? '#FFFBE6' : 'white',
+                                            display: 'flex',
+                                            justifyContent: 'space-between',
+                                            alignItems: 'center',
+                                            cursor: 'pointer'
+                                        }}
+                                    >
+                                        <div>
+                                            <p style={{ fontWeight: '800', fontSize: '13px' }}>{h.name}</p>
+                                            <p style={{ fontSize: '11px', color: COLORS.muted }}>{h.dist} | ⭐ {h.rating}</p>
+                                        </div>
+                                        {selectedHospital?.id === h.id && <span style={{ color: COLORS.primary }}>✅</span>}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Medical Condition */}
+                    <div className="fade-up" style={{ backgroundColor: 'white', borderRadius: '16px', padding: '16px', marginBottom: '16px', animationDelay: '0.16s' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                            <h4 style={{ fontSize: '14px', fontWeight: '800' }}>⚕️ Medical Condition</h4>
+                            <span style={{ fontSize: '12px', color: COLORS.muted }}>(Optional)</span>
+                        </div>
+                        <p style={{ fontSize: '11px', color: COLORS.muted, marginBottom: '12px' }}>Helps driver & paramedic prepare in advance</p>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '12px' }}>
+                            {MEDICAL_CONDITIONS.map(c => (
+                                <button 
+                                    key={c}
+                                    onClick={() => setCondition(condition === c ? '' : c)}
+                                    style={{
+                                        padding: '6px 12px',
+                                        borderRadius: '20px',
+                                        border: condition === c ? `1.5px solid ${COLORS.accent}` : '1px solid #eee',
+                                        backgroundColor: condition === c ? '#FFEBEE' : 'white',
+                                        color: condition === c ? COLORS.accent : COLORS.text,
+                                        fontSize: '11px',
+                                        fontWeight: '700',
+                                        transition: 'all 0.2s'
+                                    }}
+                                >{c}</button>
+                            ))}
+                        </div>
+                        <textarea 
+                            placeholder="Add any extra notes..."
+                            value={notes}
+                            onChange={(e) => setNotes(e.target.value)}
+                            style={{
+                                width: '100%',
+                                padding: '12px',
+                                borderRadius: '10px',
+                                border: '1px solid #eee',
+                                fontSize: '13px',
+                                fontFamily: 'inherit',
+                                height: '60px'
+                            }}
+                        />
+                    </div>
+
+                    {/* Price Summary */}
+                    <div className="fade-up" style={{ 
+                        backgroundColor: '#FFFBE6', 
+                        borderRadius: '16px', 
+                        padding: '16px', 
+                        border: `2px solid ${COLORS.primary}`,
+                        marginBottom: '100px',
+                        animationDelay: '0.24s'
+                    }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                            <div>
+                                <p style={{ fontWeight: '800', fontSize: '14px' }}>Estimated Fare</p>
+                                <p style={{ fontSize: '11px', color: COLORS.muted }}>Base + distance charges</p>
+                            </div>
+                            <span style={{ fontSize: '24px', fontWeight: '900', color: COLORS.accent }}>₹{service.price}</span>
+                        </div>
+                        <div style={{ backgroundColor: '#E8F5E9', padding: '6px 10px', borderRadius: '8px', display: 'flex', gap: '6px', alignItems: 'center' }}>
+                            <span>💳</span>
+                            <span style={{ fontSize: '11px', fontWeight: '800', color: '#2E7D32' }}>Pay Later / Pay at Hospital — No advance payment</span>
+                        </div>
+                    </div>
+
+                    {/* Fixed Footer for Page B */}
+                    <div style={{
+                        position: 'fixed',
+                        bottom: '90px',
+                        left: 0,
+                        width: '100%',
+                        backgroundColor: 'white',
+                        padding: '16px',
+                        boxShadow: '0 -4px 12px rgba(0,0,0,0.05)',
+                        zIndex: 90
+                    }}>
+                        <button 
+                            disabled={!canConfirm}
+                            onClick={() => onConfirm({ dropMode, hospital: selectedHospital, condition, notes })}
+                            style={{
+                                width: '100%',
+                                backgroundColor: canConfirm ? COLORS.accent : '#ccc',
+                                color: 'white',
+                                border: 'none',
+                                padding: '16px',
+                                borderRadius: '14px',
+                                fontWeight: '900',
+                                fontSize: '16px',
+                                cursor: canConfirm ? 'pointer' : 'not-allowed'
+                            }}
+                        >🚑 Confirm & Book Ambulance</button>
+                        <a href="tel:123456" style={{
+                            display: 'block',
+                            textAlign: 'center',
+                            marginTop: '12px',
+                            color: COLORS.accent,
+                            textDecoration: 'none',
+                            fontWeight: '800',
+                            fontSize: '13px'
+                        }}>📞 Call Help Desk Instead</a>
+                    </div>
+                </div>
+            );
+        };
+
+        const PageC = ({ bookingId, onReset }) => {
+            const [eta, setEta] = useState(7);
+            const [copied, setCopied] = useState(false);
+
+            useEffect(() => {
+                const interval = setInterval(() => {
+                    setEta(prev => prev > 1 ? prev - 1 : 1);
+                }, 20000); // Counts down every 20s as requested
+                return () => clearInterval(interval);
+            }, []);
+
+            const copyToClipboard = () => {
+                setCopied(true);
+                setTimeout(() => setCopied(false), 2000);
+            };
+
+            return (
+                <div style={{ paddingBottom: '120px' }}>
+                    {/* ETA Banner */}
+                    <div style={{ 
+                        backgroundColor: COLORS.accent, 
+                        padding: '24px 16px', 
+                        color: 'white', 
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        alignItems: 'center' 
+                    }}>
+                        <div>
+                            <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
+                                <span style={{ fontSize: '40px', fontWeight: '900' }}>{eta}</span>
+                                <span style={{ fontSize: '18px', fontWeight: '700' }}>MIN</span>
+                            </div>
+                            <p style={{ fontSize: '13px', fontWeight: '700', opacity: 0.9 }}>Estimated arrival time</p>
+                        </div>
+                        <span style={{ fontSize: '48px' }} className="pulse">🚑</span>
+                    </div>
+
+                    <div style={{ padding: '16px' }}>
+                        {/* Mock Map */}
+                        <div className="fade-up" style={{ 
+                            height: '180px', 
+                            borderRadius: '20px', 
+                            background: 'linear-gradient(45deg, #e3f2fd 25%, #bbdefb 25%, #bbdefb 50%, #e3f2fd 50%, #e3f2fd 75%, #bbdefb 75%, #bbdefb 100%)',
+                            backgroundSize: '20px 20px',
+                            position: 'relative',
+                            marginBottom: '16px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            overflow: 'hidden',
+                            border: '1px solid #ddd'
+                        }}>
+                            <div style={{ 
+                                backgroundColor: 'white', 
+                                padding: '6px 12px', 
+                                borderRadius: '20px', 
+                                boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+                                fontWeight: '800',
+                                fontSize: '12px',
+                                zIndex: 2
+                            }}>🗺️ Live Map — Ambulance Approaching</div>
+                            <span style={{ position: 'absolute', bottom: '20px', left: '20px', fontSize: '32px' }} className="pulse">🚑</span>
+                            <span style={{ position: 'absolute', top: '20px', right: '40px', fontSize: '24px' }}>📍</span>
+                        </div>
+
+                        {/* Driver Card */}
+                        <div className="fade-up" style={{ 
+                            backgroundColor: 'white', 
+                            borderRadius: '16px', 
+                            padding: '16px', 
+                            marginBottom: '16px', 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            gap: '12px',
+                            animationDelay: '0.08s'
+                        }}>
+                            <div style={{ 
+                                width: '56px', 
+                                height: '56px', 
+                                backgroundColor: COLORS.primary, 
+                                borderRadius: '50%', 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                justifyContent: 'center', 
+                                fontSize: '32px',
+                                border: '2px solid white',
+                                boxShadow: '0 0 0 2px #FFD700'
+                            }}>👨‍⚕️</div>
+                            <div style={{ flex: 1 }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                    <p style={{ fontWeight: '800', fontSize: '15px' }}>Ramesh Kumar</p>
+                                    <span style={{ backgroundColor: '#E8F5E9', color: '#2E7D32', fontSize: '9px', fontWeight: '800', padding: '2px 6px', borderRadius: '4px' }}>Verified Paramedic</span>
+                                </div>
+                                <p style={{ fontSize: '12px', color: COLORS.muted }}>Vehicle: MP04 AA 1234</p>
+                            </div>
+                            <a href="tel:123456" style={{ 
+                                width: '44px', 
+                                height: '44px', 
+                                backgroundColor: COLORS.primary, 
+                                borderRadius: '50%', 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                justifyContent: 'center', 
+                                textDecoration: 'none',
+                                fontSize: '20px'
+                            }}>📞</a>
+                        </div>
+
+                        {/* Timeline */}
+                        <div className="fade-up" style={{ backgroundColor: 'white', borderRadius: '16px', padding: '16px', marginBottom: '16px', animationDelay: '0.16s' }}>
+                            {[
+                                { label: 'Booking Confirmed', status: 'done', icon: '✅' },
+                                { label: 'Finding Nearest Ambulance', status: 'done', icon: '🔍' },
+                                { label: 'Ambulance Dispatched', status: 'done', icon: '🚑' },
+                                { label: 'Driver En Route to You', status: 'active', icon: '📍' },
+                                { label: 'Arrived at Pickup', status: 'pending', icon: '🏁' }
+                            ].map((step, i) => (
+                                <div key={i} style={{ display: 'flex', gap: '16px', marginBottom: i === 4 ? 0 : '16px', position: 'relative' }}>
+                                    {i < 4 && <div style={{ position: 'absolute', left: '12px', top: '24px', width: '2px', height: '16px', backgroundColor: step.status === 'done' ? '#4CAF50' : '#eee' }} />}
+                                    <div style={{ 
+                                        width: '26px', 
+                                        height: '26px', 
+                                        borderRadius: '50%', 
+                                        backgroundColor: step.status === 'done' ? '#4CAF50' : step.status === 'active' ? COLORS.primary : '#eee',
+                                        display: 'flex', 
+                                        alignItems: 'center', 
+                                        justifyContent: 'center',
+                                        fontSize: '12px',
+                                        color: step.status === 'done' ? 'white' : 'inherit',
+                                        zIndex: 1
+                                    }}>{step.status === 'done' ? '✓' : ''}</div>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <span style={{ fontSize: '14px' }}>{step.icon}</span>
+                                        <span style={{ 
+                                            fontSize: '13px', 
+                                            fontWeight: step.status === 'active' ? '800' : '600',
+                                            color: step.status === 'pending' ? '#999' : step.status === 'done' ? '#4CAF50' : '#000'
+                                        }}>{step.label}</span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Booking ID */}
+                        <div className="fade-up" style={{ 
+                            backgroundColor: '#FFFBE6', 
+                            padding: '16px', 
+                            borderRadius: '16px', 
+                            border: `2px dashed ${COLORS.primary}`,
+                            marginBottom: '16px',
+                            animationDelay: '0.24s',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center'
+                        }}>
+                            <div>
+                                <p style={{ fontSize: '10px', fontWeight: '800', color: COLORS.muted }}>BOOKING ID</p>
+                                <p style={{ fontSize: '16px', fontWeight: '900' }}>KW-AMB-{bookingId}</p>
+                            </div>
+                            <button 
+                                onClick={copyToClipboard}
+                                style={{
+                                    backgroundColor: 'white',
+                                    border: '1px solid #ddd',
+                                    padding: '6px 12px',
+                                    borderRadius: '8px',
+                                    fontSize: '12px',
+                                    fontWeight: '800'
+                                }}
+                            >{copied ? '✅ Copied' : '📋 Copy'}</button>
+                        </div>
+
+                        {/* Pay at Hospital notice */}
+                        <div className="fade-up" style={{ 
+                            backgroundColor: '#E8F5E9', 
+                            padding: '16px', 
+                            borderRadius: '16px', 
+                            display: 'flex', 
+                            gap: '12px', 
+                            alignItems: 'center',
+                            marginBottom: '40px',
+                            animationDelay: '0.3s'
+                        }}>
+                            <span style={{ fontSize: '24px' }}>💳</span>
+                            <div>
+                                <p style={{ fontWeight: '800', fontSize: '14px', color: '#1B5E20' }}>Pay at Hospital</p>
+                                <p style={{ fontSize: '11px', color: '#2E7D32' }}>No payment needed right now. Focus on the patient.</p>
+                            </div>
+                        </div>
+
+                        <button 
+                            onClick={onReset}
+                            style={{
+                                width: '100%',
+                                background: 'none',
+                                border: 'none',
+                                color: COLORS.muted,
+                                fontWeight: '800',
+                                fontSize: '14px',
+                                paddingBottom: '20px'
+                            }}
+                        >← Back to Home</button>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- MAIN APP ---
+
+        const App = () => {
+            const [page, setPage] = useState('home');
+            const [flow, setFlow] = useState('select');
+            const [selectedService, setSelectedService] = useState(null);
+            const [bookingId, setBookingId] = useState(null);
+
+            const handleServiceSelect = (service) => {
+                setSelectedService(service);
+                setFlow('location');
+            };
+
+            const handleConfirmBooking = (details) => {
+                const id = Math.floor(10000 + Math.random() * 90000);
+                setBookingId(id);
+                setFlow('tracking');
+            };
+
+            const handleBack = () => {
+                if (flow === 'location') setFlow('select');
+                else if (flow === 'tracking') setFlow('select');
+            };
+
+            const resetFlow = () => {
+                setFlow('select');
+                setSelectedService(null);
+            };
+
+            const navigateToAmbulance = () => {
+                setPage('services');
+                setFlow('select');
+            };
+
+            // Main Content Area
+            const renderContent = () => {
+                if (page === 'home') {
+                    return <HomeView onNavigateToAmbulance={navigateToAmbulance} />;
+                }
+                
+                if (page !== 'services') {
+                    const placeholders = {
+                        orders: { title: 'Your Orders', icon: '📦' },
+                        profile: { title: 'Profile', icon: '👤' }
+                    };
+                    return <Placeholder {...placeholders[page]} />;
+                }
+
+                switch (flow) {
+                    case 'select':
+                        return (
+                            <>
+                                <Header title="🚑 Ambulance" subtitle="Select service type" />
+                                <PageA onSelect={handleServiceSelect} />
+                            </>
+                        );
+                    case 'location':
+                        return (
+                            <>
+                                <Header title={selectedService.type} subtitle="Enter pickup & drop details" showBack onBack={handleBack} />
+                                <PageB service={selectedService} onConfirm={handleConfirmBooking} onBack={handleBack} />
+                            </>
+                        );
+                    case 'tracking':
+                        return (
+                            <>
+                                <Header title="🚑 Ambulance Tracking" subtitle="Live status updates" />
+                                <PageC bookingId={bookingId} onReset={resetFlow} />
+                            </>
+                        );
+                    default:
+                        return null;
+                }
+            };
+
+            return (
+                <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+                    {renderContent()}
+                    
+                    <SOSButton />
+                    <BottomNav activeTab={page} onTabChange={(newTab) => { setPage(newTab); resetFlow(); }} />
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
