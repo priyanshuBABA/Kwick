@@ -1,141 +1,206 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MobileFrame from '../components/MobileFrame';
-import { ChevronLeft, Phone, MapPin, Search, Clock, ShieldCheck, Heart, Activity, Ambulance, Hospital, Info, CheckCircle2, Copy, Check } from 'lucide-react';
+import {
+  Activity,
+  Ambulance,
+  Check,
+  CheckCircle2,
+  ChevronLeft,
+  Clock,
+  Copy,
+  Heart,
+  Hospital,
+  Home,
+  MapPin,
+  Phone,
+  Search,
+  ShieldCheck,
+  ShoppingBag,
+  User,
+  Zap,
+} from 'lucide-react';
 
 const COLORS = {
-  primary: '#FFD60A',
+  primary: '#FFD700',
   accent: '#E53935',
   bg: '#f5f5f5',
   card: '#ffffff',
   text: '#1A1A1A',
   muted: '#666',
-  success: '#4CAF50'
+  success: '#4CAF50',
 };
 
 const AMBULANCE_TYPES = [
   { id: 'bls', type: 'BLS', name: 'Basic Life Support', icon: '🚑', desc: 'Accidents, fever, general emergencies', price: 299, tag: 'Most Booked', tagColor: '#E8F5E9', tagText: '#2E7D32' },
   { id: 'als', type: 'ALS', name: 'Advanced Life Support', icon: '🏥', desc: 'ICU on wheels — Ventilator & Oxygen', price: 599, tag: 'ICU Ready', tagColor: '#E3F2FD', tagText: '#1565C0' },
-  { id: 'pt', type: 'PT', name: 'Patient Transport', icon: '🛻', desc: 'Non-emergency hospital transfer', price: 199, tag: 'Affordable', tagColor: '#F3E5F5', tagText: '#7B1FA2' }
+  { id: 'pt', type: 'PT', name: 'Patient Transport', icon: '🛻', desc: 'Non-emergency hospital transfer', price: 199, tag: 'Affordable', tagColor: '#F3E5F5', tagText: '#7B1FA2' },
 ];
 
 const HOSPITALS = [
   { id: 'h1', name: 'AIIMS Bhopal', dist: '1.2 km', rating: '4.8' },
   { id: 'h2', name: 'Hamidia Hospital', dist: '2.5 km', rating: '4.5' },
   { id: 'h3', name: 'Apollo Hospital', dist: '3.8 km', rating: '4.7' },
-  { id: 'h4', name: 'Bansal Hospital', dist: '4.1 km', rating: '4.6' }
+  { id: 'h4', name: 'Bansal Hospital', dist: '4.1 km', rating: '4.6' },
 ];
 
 const MEDICAL_CONDITIONS = ['Heart Attack', 'Road Accident', 'Stroke', 'Difficulty Breathing', 'Unconscious', 'Fracture', 'Burn', 'Other'];
 
 const Header = ({ title, subtitle, showBack, onBack }) => (
-  <div className="sticky top-0 z-50 bg-[#FFD60A] p-4 flex items-center gap-3 shadow-md">
+  <div style={{ position: 'sticky', top: 0, zIndex: 60, background: COLORS.primary, padding: '16px 16px 14px', display: 'flex', alignItems: 'center', gap: 12, boxShadow: '0 8px 24px rgba(0,0,0,0.08)' }}>
     {showBack && (
-      <button onClick={onBack} className="p-2 hover:bg-black/5 rounded-full transition-colors">
-        <ChevronLeft className="w-6 h-6" />
+      <button onClick={onBack} style={{ border: 'none', background: 'rgba(255,255,255,0.25)', width: 38, height: 38, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+        <ChevronLeft size={20} />
       </button>
     )}
     <div>
-      <h1 className="text-xl font-black tracking-tight">{title}</h1>
-      <p className="text-[11px] font-bold opacity-70 uppercase tracking-widest">{subtitle}</p>
+      <h1 style={{ margin: 0, fontSize: 20, fontWeight: 900, color: COLORS.text }}>{title}</h1>
+      <p style={{ margin: '2px 0 0', fontSize: 11, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#4d4d4d' }}>{subtitle}</p>
     </div>
   </div>
 );
 
+const BottomNav = ({ activeTab }) => {
+  const tabs = [
+    { id: 'home', label: 'HOME', icon: Home },
+    { id: 'orders', label: 'ORDERS', icon: ShoppingBag },
+    { id: 'services', label: 'SERVICES', icon: Zap },
+    { id: 'profile', label: 'PROFILE', icon: User },
+  ];
+
+  return (
+    <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 100, background: '#fff', borderTop: '1px solid #eee', display: 'flex', justifyContent: 'space-around', padding: '10px 0 12px' }}>
+      {tabs.map((tab) => {
+        const Icon = tab.icon;
+        const isActive = activeTab === tab.id;
+        return (
+          <div key={tab.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, color: isActive ? COLORS.primary : '#999', fontWeight: 800, fontSize: 10, letterSpacing: '0.12em' }}>
+            <Icon size={20} />
+            <span>{tab.label}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
+const SOSButton = () => (
+  <a href="tel:108" style={{ position: 'fixed', bottom: 88, right: 18, zIndex: 999, width: 64, height: 64, borderRadius: '50%', background: COLORS.accent, color: '#fff', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', boxShadow: '0 14px 36px rgba(229,57,53,0.28)', fontWeight: 800, fontSize: 11, animation: 'pulse 1.8s infinite' }}>
+    <span style={{ fontSize: 24 }}>🆘</span>
+    <span style={{ lineHeight: 1 }}>SOS</span>
+  </a>
+);
+
 const AmbulanceService = () => {
   const navigate = useNavigate();
-  const [flow, setFlow] = useState('select'); // select | location | tracking
+  const [flow, setFlow] = useState('select');
   const [selectedService, setSelectedService] = useState(null);
-  const [bookingId, setBookingId] = useState(null);
-
-  // Page B States
+  const [bookingId, setBookingId] = useState('');
+  const [eta, setEta] = useState(7);
+  const [copied, setCopied] = useState(false);
   const [dropMode, setDropMode] = useState('nearest');
   const [selectedHospital, setSelectedHospital] = useState(null);
   const [condition, setCondition] = useState('');
   const [notes, setNotes] = useState('');
-
-  // Page C States
-  const [eta, setEta] = useState(7);
-  const [copied, setCopied] = useState(false);
+  const [bookingData, setBookingData] = useState({ service: null, pickup: 'Munger Fort, Bhopal (Current Location)', dropMode: 'nearest', hospital: null, medInfo: '', condition: '' });
 
   useEffect(() => {
     if (flow === 'tracking') {
-      const interval = setInterval(() => {
-        setEta(prev => prev > 1 ? prev - 1 : 1);
+      const interval = window.setInterval(() => {
+        setEta((prev) => (prev > 1 ? prev - 1 : 1));
       }, 20000);
-      return () => clearInterval(interval);
+      return () => window.clearInterval(interval);
     }
   }, [flow]);
 
+  useEffect(() => {
+    setBookingData((prev) => ({ ...prev, dropMode, hospital: dropMode === 'nearest' ? { id: 'nearest', name: 'Nearest Available Hospital' } : selectedHospital, condition, medInfo: notes }));
+  }, [dropMode, selectedHospital, condition, notes]);
+
+  useEffect(() => {
+    setBookingId(String(Math.floor(10000 + Math.random() * 90000)));
+  }, []);
+
+  const selectedPrice = useMemo(() => selectedService?.price || 299, [selectedService]);
+
+  const chooseService = (service) => {
+    setSelectedService(service);
+    setBookingData((prev) => ({ ...prev, service }));
+    setFlow('location');
+  };
+
   const handleConfirmBooking = () => {
-    const id = Math.floor(10000 + Math.random() * 90000);
-    setBookingId(id);
+    if (dropMode === 'choose' && !selectedHospital) return;
     setFlow('tracking');
   };
 
   const copyToClipboard = () => {
+    navigator.clipboard?.writeText(`KW-AMB-${bookingId}`);
     setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    window.setTimeout(() => setCopied(false), 1600);
+  };
+
+  const resetFlow = () => {
+    setFlow('select');
+    setSelectedService(null);
+    setDropMode('nearest');
+    setSelectedHospital(null);
+    setCondition('');
+    setNotes('');
+    setEta(7);
+    setCopied(false);
+    setBookingData({ service: null, pickup: 'Munger Fort, Bhopal (Current Location)', dropMode: 'nearest', hospital: null, medInfo: '', condition: '' });
   };
 
   const renderSelect = () => (
-    <div className="p-4 pb-24">
-      {/* Emergency Banner */}
-      <div className="bg-[#E53935] rounded-2xl p-4 flex items-center justify-between mb-6 text-white shadow-lg shadow-red-500/20">
-        <div className="flex items-center gap-3">
-          <div className="animate-pulse bg-white/20 p-2 rounded-full">🚨</div>
+    <div style={{ padding: '18px 16px 100px', background: COLORS.bg }}>
+      <div style={{ background: COLORS.accent, borderRadius: 20, padding: '16px 16px', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 8px 28px rgba(229,57,53,0.24)', marginBottom: 18 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ animation: 'blink 1s infinite', fontSize: 24 }}>🚨</div>
           <div>
-            <p className="font-black text-sm uppercase tracking-wider">Emergency?</p>
-            <p className="text-[10px] font-bold opacity-80 uppercase tracking-widest">Available 24/7</p>
+            <div style={{ fontSize: 13, fontWeight: 900, letterSpacing: '0.16em', textTransform: 'uppercase' }}>Emergency?</div>
+            <div style={{ fontSize: 11, fontWeight: 700, opacity: 0.8 }}>Call 108 for urgent help</div>
           </div>
         </div>
-        <a href="tel:108" className="bg-white text-[#E53935] px-4 py-2 rounded-xl font-black text-xs uppercase tracking-widest shadow-sm">CALL 108</a>
+        <a href="tel:108" style={{ background: '#fff', color: COLORS.accent, padding: '8px 12px', borderRadius: 12, fontWeight: 900, fontSize: 11, textDecoration: 'none', letterSpacing: '0.12em' }}>CALL 108</a>
       </div>
 
-      <h2 className="text-lg font-black mb-4 px-1 text-slate-800">Choose Ambulance Type</h2>
-
-      <div className="flex flex-col gap-4">
-        {AMBULANCE_TYPES.map((service, idx) => (
-          <div 
-            key={service.id}
-            onClick={() => { setSelectedService(service); setFlow('location'); }}
-            className="bg-white rounded-3xl p-4 flex gap-4 shadow-sm border border-slate-100 hover:border-[#FFD60A] transition-all cursor-pointer active:scale-95 group relative overflow-hidden"
-          >
-             <div className="absolute top-0 right-0 w-12 h-12 bg-slate-50 rounded-bl-full group-hover:scale-150 transition-transform" />
-             <div className="w-16 h-16 bg-[#FFD60A] rounded-2xl flex items-center justify-center text-3xl shadow-inner shrink-0 relative z-10">
-               {service.icon}
-             </div>
-             <div className="flex-1 relative z-10">
-               <div className="flex items-center gap-2 mb-1">
-                 <h3 className="font-black text-slate-800 uppercase tracking-tight">{service.type}</h3>
-                 <span style={{ backgroundColor: service.tagColor, color: service.tagText }} className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md">
-                   {service.tag}
-                 </span>
-               </div>
-               <p className="text-[11px] font-bold text-slate-400 mb-2 leading-tight">{service.desc}</p>
-               <div className="flex items-center justify-between">
-                 <span className="text-xl font-black text-[#E53935]">₹{service.price}</span>
-                 <span className="bg-[#FFD60A] text-black text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-xl shadow-sm">Book ➔</span>
-               </div>
-             </div>
+      <div style={{ fontSize: 18, fontWeight: 900, marginBottom: 12, color: COLORS.text }}>Choose Ambulance Type</div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        {AMBULANCE_TYPES.map((service, index) => (
+          <div key={service.id} onClick={() => chooseService(service)} style={{ background: COLORS.card, borderRadius: 18, padding: 14, display: 'flex', gap: 12, boxShadow: '0 10px 30px rgba(0,0,0,0.06)', cursor: 'pointer', border: '1px solid #f3f3f3', animation: 'fadeUp 0.35s ease forwards', animationDelay: `${index * 80}ms`, opacity: 0 }}>
+            <div style={{ width: 58, height: 58, borderRadius: 16, background: COLORS.primary, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, flexShrink: 0 }}>
+              {service.icon}
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                <div style={{ fontSize: 14, fontWeight: 900 }}>{service.type}</div>
+                <span style={{ background: service.tagColor, color: service.tagText, padding: '3px 8px', borderRadius: 999, fontSize: 9, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase' }}>{service.tag}</span>
+              </div>
+              <div style={{ fontSize: 12, color: COLORS.muted, lineHeight: 1.4, marginBottom: 10 }}>{service.desc}</div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ color: COLORS.accent, fontSize: 20, fontWeight: 900 }}>₹{service.price}</div>
+                <div style={{ background: COLORS.primary, color: COLORS.text, padding: '8px 10px', borderRadius: 999, fontSize: 11, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Book →</div>
+              </div>
+            </div>
           </div>
         ))}
       </div>
 
-      <div className="bg-white rounded-3xl p-6 mt-8 border border-slate-100">
-        <h4 className="font-black text-slate-800 mb-4 uppercase tracking-wider text-sm flex items-center gap-2">
-          <ShieldCheck className="w-4 h-4 text-[#FFD60A]" /> Why Kwick Ambulance?
-        </h4>
-        <div className="grid grid-cols-2 gap-4">
+      <div style={{ background: COLORS.card, borderRadius: 20, padding: 16, marginTop: 18, boxShadow: '0 10px 30px rgba(0,0,0,0.05)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 900, fontSize: 14, marginBottom: 12 }}>
+          <ShieldCheck size={16} color={COLORS.primary} /> Why Kwick Ambulance?
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
           {[
-            { icon: <Clock className="w-4 h-4" />, text: 'Under 8 min response' },
-            { icon: <Activity className="w-4 h-4" />, text: 'Pay Later at Hospital' },
-            { icon: <MapPin className="w-4 h-4" />, text: 'Live GPS tracking' },
-            { icon: <Heart className="w-4 h-4" />, text: 'Trained paramedic' }
-          ].map((item, i) => (
-            <div key={i} className="flex gap-2 items-center">
-              <div className="bg-slate-50 p-2 rounded-lg text-[#FFD60A]">{item.icon}</div>
-              <span className="text-[10px] font-black text-slate-500 uppercase tracking-tight">{item.text}</span>
+            { icon: <Clock size={13} />, text: 'Under 8 min avg. response time' },
+            { icon: <Activity size={13} />, text: 'Pay later / pay at hospital' },
+            { icon: <MapPin size={13} />, text: 'Live GPS tracking' },
+            { icon: <Heart size={13} />, text: 'Trained paramedic onboard' },
+          ].map((item, index) => (
+            <div key={index} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, background: '#fafafa', padding: 10, borderRadius: 12 }}>
+              <div style={{ color: COLORS.primary, marginTop: 1 }}>{item.icon}</div>
+              <div style={{ fontSize: 11, fontWeight: 700, color: COLORS.muted, lineHeight: 1.3 }}>{item.text}</div>
             </div>
           ))}
         </div>
@@ -144,228 +209,181 @@ const AmbulanceService = () => {
   );
 
   const renderLocation = () => (
-    <div className="p-4 pb-48">
-      {/* Pickup Card */}
-      <div className="bg-white rounded-3xl p-5 mb-4 shadow-sm border border-slate-100">
-        <div className="flex items-center gap-2 mb-4">
-          <MapPin className="w-4 h-4 text-[#FFD60A]" />
-          <h4 className="text-xs font-black uppercase tracking-widest text-slate-400">Pickup Location</h4>
+    <div style={{ padding: '16px 16px 120px', background: COLORS.bg }}>
+      <div style={{ background: COLORS.card, borderRadius: 20, padding: 16, marginBottom: 12, boxShadow: '0 10px 30px rgba(0,0,0,0.05)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+          <MapPin size={16} color={COLORS.primary} />
+          <div style={{ fontSize: 12, fontWeight: 900, letterSpacing: '0.12em', textTransform: 'uppercase', color: COLORS.muted }}>Pickup Location</div>
         </div>
-        <div className="bg-yellow-50/50 p-4 rounded-2xl border border-yellow-100 flex items-center gap-3">
-          <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm">📍</div>
-          <span className="text-sm font-black text-slate-800">Munger Fort, Bhopal (Current)</span>
+        <div style={{ background: 'rgba(255,215,0,0.14)', border: '1px solid rgba(255,215,0,0.3)', borderRadius: 16, padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>📍</div>
+          <div style={{ fontSize: 14, fontWeight: 800 }}>{bookingData.pickup}</div>
         </div>
-        <button className="mt-3 text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-1 hover:text-black transition-colors">
-          <Search className="w-3 h-3" /> Change Pickup Location
+        <button style={{ marginTop: 10, background: 'transparent', border: 'none', color: COLORS.muted, fontWeight: 800, fontSize: 11, display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', padding: 0 }}>
+          <Search size={13} /> Change Pickup Location
         </button>
       </div>
 
-      {/* Hospital Selection */}
-      <div className="bg-white rounded-3xl p-5 mb-4 shadow-sm border border-slate-100">
-        <div className="flex items-center gap-2 mb-4">
-          <Hospital className="w-4 h-4 text-[#FFD60A]" />
-          <h4 className="text-xs font-black uppercase tracking-widest text-slate-400">Hospital / Drop Location</h4>
+      <div style={{ background: COLORS.card, borderRadius: 20, padding: 16, marginBottom: 12, boxShadow: '0 10px 30px rgba(0,0,0,0.05)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+          <Hospital size={16} color={COLORS.primary} />
+          <div style={{ fontSize: 12, fontWeight: 900, letterSpacing: '0.12em', textTransform: 'uppercase', color: COLORS.muted }}>Drop Location</div>
         </div>
-        
-        <div className="flex gap-3 mb-4">
-          <button 
-            onClick={() => setDropMode('nearest')}
-            className={`flex-1 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest border-2 transition-all ${dropMode === 'nearest' ? 'bg-yellow-50 border-[#FFD60A] text-black shadow-inner' : 'bg-white border-slate-100 text-slate-400'}`}
-          >🎯 Nearest</button>
-          <button 
-            onClick={() => setDropMode('choose')}
-            className={`flex-1 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest border-2 transition-all ${dropMode === 'choose' ? 'bg-yellow-50 border-[#FFD60A] text-black shadow-inner' : 'bg-white border-slate-100 text-slate-400'}`}
-          >🔍 I'll Choose</button>
+        <div style={{ display: 'flex', gap: 10, marginBottom: 12 }}>
+          <button onClick={() => setDropMode('nearest')} style={{ flex: 1, borderRadius: 14, padding: '10px 8px', border: dropMode === 'nearest' ? `2px solid ${COLORS.primary}` : '2px solid #ececec', background: dropMode === 'nearest' ? 'rgba(255,215,0,0.16)' : '#fff', fontWeight: 800, fontSize: 11, cursor: 'pointer', color: dropMode === 'nearest' ? COLORS.text : COLORS.muted }}>🎯 Nearest Hospital</button>
+          <button onClick={() => setDropMode('choose')} style={{ flex: 1, borderRadius: 14, padding: '10px 8px', border: dropMode === 'choose' ? `2px solid ${COLORS.primary}` : '2px solid #ececec', background: dropMode === 'choose' ? 'rgba(255,215,0,0.16)' : '#fff', fontWeight: 800, fontSize: 11, cursor: 'pointer', color: dropMode === 'choose' ? COLORS.text : COLORS.muted }}>🔍 I&apos;ll Choose</button>
         </div>
-
         {dropMode === 'nearest' ? (
-          <div className="bg-green-50 p-4 rounded-2xl border border-green-100 flex items-center gap-3">
-            <CheckCircle2 className="w-5 h-5 text-green-500" />
-            <span className="text-xs font-black text-green-700 uppercase tracking-tight">Auto-selecting nearest hospital</span>
+          <div style={{ background: 'rgba(76,175,80,0.12)', border: '1px solid rgba(76,175,80,0.2)', borderRadius: 14, padding: '10px 12px', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <CheckCircle2 size={17} color={COLORS.success} />
+            <div style={{ fontSize: 12, fontWeight: 800, color: '#2e7d32' }}>✅ Will auto-select nearest available hospital</div>
           </div>
         ) : (
-          <div className="flex flex-col gap-2">
-            {HOSPITALS.map(h => (
-              <div 
-                key={h.id}
-                onClick={() => setSelectedHospital(h)}
-                className={`p-4 rounded-2xl border-2 transition-all cursor-pointer flex justify-between items-center ${selectedHospital?.id === h.id ? 'bg-yellow-50 border-[#FFD60A] shadow-inner' : 'bg-white border-slate-100'}`}
-              >
-                <div>
-                  <p className="font-black text-sm text-slate-800 uppercase tracking-tight">{h.name}</p>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{h.dist} • ⭐ {h.rating}</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {HOSPITALS.map((hospital) => {
+              const active = selectedHospital?.id === hospital.id;
+              return (
+                <div key={hospital.id} onClick={() => setSelectedHospital(hospital)} style={{ border: active ? `2px solid ${COLORS.primary}` : '1px solid #ececec', background: active ? 'rgba(255,215,0,0.14)' : '#fff', borderRadius: 14, padding: '12px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}>
+                  <div>
+                    <div style={{ fontSize: 14, fontWeight: 800 }}>{hospital.name}</div>
+                    <div style={{ fontSize: 11, color: COLORS.muted, marginTop: 2 }}>{hospital.dist} • ⭐ {hospital.rating}</div>
+                  </div>
+                  {active ? <CheckCircle2 size={18} color={COLORS.primary} /> : null}
                 </div>
-                {selectedHospital?.id === h.id && <CheckCircle2 className="w-5 h-5 text-[#FFD60A]" />}
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
 
-      {/* Medical Conditions */}
-      <div className="bg-white rounded-3xl p-5 mb-4 shadow-sm border border-slate-100">
-        <div className="flex justify-between items-center mb-1">
-          <h4 className="text-xs font-black uppercase tracking-widest text-slate-800 flex items-center gap-2">
-            <Activity className="w-4 h-4 text-[#FFD60A]" /> Medical Condition
-          </h4>
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">(Optional)</span>
-        </div>
-        <p className="text-[10px] font-bold text-slate-400 mb-4 uppercase tracking-widest opacity-60">Helps paramedic prepare in advance</p>
-        <div className="flex flex-wrap gap-2 mb-4">
-          {MEDICAL_CONDITIONS.map(c => (
-            <button 
-              key={c}
-              onClick={() => setCondition(condition === c ? '' : c)}
-              className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border-2 ${condition === c ? 'bg-red-50 border-red-500 text-red-600' : 'bg-white border-slate-100 text-slate-400'}`}
-            >{c}</button>
-          ))}
-        </div>
-        <textarea 
-          placeholder="Add any extra notes..."
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-          className="w-100 w-full bg-slate-50 border-none rounded-2xl p-4 text-xs font-bold focus:ring-2 focus:ring-[#FFD60A] transition-all resize-none h-24"
-        />
-      </div>
-
-      {/* Fare Summary */}
-      <div className="bg-[#FFD60A] rounded-3xl p-6 shadow-xl shadow-yellow-500/20 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-bl-full" />
-        <div className="flex justify-between items-center mb-4 relative z-10">
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-widest opacity-60">Estimated Fare</p>
-            <p className="text-lg font-black text-slate-800">Total Price</p>
+      <div style={{ background: COLORS.card, borderRadius: 20, padding: 16, marginBottom: 12, boxShadow: '0 10px 30px rgba(0,0,0,0.05)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 900, fontSize: 13 }}>
+            <Activity size={15} color={COLORS.primary} /> Medical Condition
           </div>
-          <span className="text-4xl font-black text-[#E53935]">₹{selectedService.price}</span>
+          <div style={{ fontSize: 11, color: COLORS.muted }}>(Optional)</div>
         </div>
-        <div className="bg-white/40 p-3 rounded-2xl flex items-center gap-3 border border-white/40 backdrop-blur-md relative z-10">
-          <Activity className="w-5 h-5 text-green-700" />
-          <p className="text-[10px] font-black text-green-800 uppercase tracking-tight leading-tight">Pay at Hospital — No advance payment needed</p>
+        <div style={{ fontSize: 11, color: COLORS.muted, marginBottom: 10, lineHeight: 1.4 }}>Helps driver & paramedic prepare in advance</div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
+          {MEDICAL_CONDITIONS.map((chip) => {
+            const active = condition === chip;
+            return (
+              <button key={chip} onClick={() => setCondition(active ? '' : chip)} style={{ border: active ? `1px solid ${COLORS.accent}` : '1px solid #ececec', background: active ? 'rgba(229,57,53,0.09)' : '#fff', color: active ? COLORS.accent : COLORS.muted, padding: '7px 10px', borderRadius: 999, fontSize: 10, fontWeight: 800, cursor: 'pointer' }}>{chip}</button>
+            );
+          })}
+        </div>
+        <textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Add any extra notes..." style={{ width: '100%', minHeight: 84, border: '1px solid #ececec', borderRadius: 14, padding: '10px 12px', resize: 'none', fontSize: 12, color: COLORS.text, background: '#fafafa', outline: 'none' }} />
+      </div>
+
+      <div style={{ background: `linear-gradient(135deg, ${COLORS.primary}, #ffe066)`, borderRadius: 20, padding: 16, boxShadow: '0 10px 30px rgba(255,215,0,0.2)', border: `1px solid rgba(0,0,0,0.04)` }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+          <div>
+            <div style={{ fontSize: 11, fontWeight: 900, letterSpacing: '0.14em', textTransform: 'uppercase', opacity: 0.7 }}>Estimated Fare</div>
+            <div style={{ fontSize: 16, fontWeight: 900 }}>Base + distance charges</div>
+          </div>
+          <div style={{ fontSize: 28, fontWeight: 900, color: COLORS.accent }}>₹{selectedPrice}</div>
+        </div>
+        <div style={{ background: 'rgba(255,255,255,0.45)', border: '1px solid rgba(255,255,255,0.3)', borderRadius: 14, padding: '10px 12px', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <Activity size={16} color={COLORS.success} />
+          <div style={{ fontSize: 11, fontWeight: 800, color: '#206534' }}>💳 Pay Later / Pay at Hospital — No advance payment needed</div>
         </div>
       </div>
 
-      {/* Fixed CTA */}
-      <div className="fixed bottom-0 left-0 w-full p-6 bg-white border-t border-slate-100 z-50">
-        <div className="max-w-md mx-auto">
-          <button 
-            disabled={dropMode === 'choose' && !selectedHospital}
-            onClick={handleConfirmBooking}
-            className={`w-full py-5 rounded-2xl font-black text-lg uppercase tracking-tighter shadow-xl transition-all active:scale-95 flex items-center justify-center gap-3 ${ (dropMode === 'choose' && !selectedHospital) ? 'bg-slate-200 text-slate-400' : 'bg-[#E53935] text-white shadow-red-500/20'}`}
-          >
-            <Ambulance className="w-6 h-6" /> Confirm Booking
-          </button>
-          <a href="tel:108" className="mt-4 flex items-center justify-center gap-2 text-xs font-black text-[#E53935] uppercase tracking-widest opacity-80 hover:opacity-100 transition-opacity">
-            <Phone className="w-4 h-4" /> Call Help Desk Instead
-          </a>
-        </div>
+      <div style={{ position: 'fixed', left: 0, right: 0, bottom: 0, background: '#fff', borderTop: '1px solid #eee', padding: '14px 16px 18px', zIndex: 90 }}>
+        <button onClick={handleConfirmBooking} disabled={dropMode === 'choose' && !selectedHospital} style={{ width: '100%', border: 'none', borderRadius: 16, background: dropMode === 'choose' && !selectedHospital ? '#d3d3d3' : COLORS.accent, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '14px 16px', fontSize: 15, fontWeight: 900, letterSpacing: '0.08em', textTransform: 'uppercase', cursor: dropMode === 'choose' && !selectedHospital ? 'not-allowed' : 'pointer' }}>
+          <Ambulance size={18} /> Confirm & Book Ambulance
+        </button>
+        <a href="tel:108" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 6, marginTop: 10, color: COLORS.accent, fontSize: 11, fontWeight: 800, textDecoration: 'none', letterSpacing: '0.1em', textTransform: 'uppercase' }}><Phone size={13} /> Call Help Desk Instead</a>
       </div>
     </div>
   );
 
   const renderTracking = () => (
-    <div className="pb-24">
-      {/* ETA Header */}
-      <div className="bg-[#E53935] pt-12 pb-8 px-6 text-white text-center relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-bl-full animate-pulse" />
-        <div className="relative z-10">
-          <div className="flex items-baseline justify-center gap-1 mb-1">
-            <span className="text-6xl font-black tracking-tighter">{eta}</span>
-            <span className="text-xl font-black tracking-widest opacity-60">MIN</span>
-          </div>
-          <p className="text-xs font-black uppercase tracking-[0.2em] opacity-80">Ambulance arriving soon</p>
-        </div>
+    <div style={{ padding: '0 16px 100px', background: COLORS.bg }}>
+      <div style={{ background: COLORS.accent, padding: '24px 16px 22px', marginTop: 0, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', flexDirection: 'column', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at top right, rgba(255,255,255,0.15), transparent 28%)' }} />
+        <div style={{ fontSize: 44, fontWeight: 900, lineHeight: 1, zIndex: 1 }}>{eta} min</div>
+        <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: '0.16em', textTransform: 'uppercase', opacity: 0.9, marginTop: 4, zIndex: 1 }}>Estimated arrival time</div>
+        <div style={{ fontSize: 32, marginTop: 8, zIndex: 1, animation: 'pulse 1.8s infinite' }}>🚑</div>
       </div>
 
-      <div className="p-4 flex flex-col gap-4">
-        {/* Mock Map */}
-        <div className="h-48 bg-blue-50 rounded-3xl border border-blue-100 relative overflow-hidden flex items-center justify-center group">
-          <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(#1e3a8a 1px, transparent 1px)', backgroundSize: '20px 20px' }} />
-          <div className="bg-white px-4 py-2 rounded-full shadow-lg border border-slate-100 flex items-center gap-2 relative z-10 animate-bounce">
-            <MapPin className="w-4 h-4 text-red-500" />
-            <span className="text-[10px] font-black uppercase tracking-widest">Ambulance Approaching</span>
+      <div style={{ paddingTop: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div style={{ height: 180, background: 'linear-gradient(135deg, #e9f4ff 0%, #f7fbff 100%)', borderRadius: 20, border: '1px solid #dceefc', position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(#91c8ff 1px, transparent 1px)', backgroundSize: '18px 18px', opacity: 0.3 }} />
+          <div style={{ background: '#fff', padding: '8px 12px', borderRadius: 999, boxShadow: '0 8px 22px rgba(0,0,0,0.08)', fontSize: 12, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <MapPin size={13} color={COLORS.accent} /> 🗺️ Live Map — Ambulance Approaching
           </div>
-          <div className="absolute bottom-6 left-12 text-4xl animate-pulse">🚑</div>
-          <div className="absolute top-6 right-12 text-2xl">📍</div>
+          <div style={{ position: 'absolute', bottom: 18, left: 20, fontSize: 34, animation: 'pulse 1.8s infinite' }}>🚑</div>
+          <div style={{ position: 'absolute', top: 14, right: 18, fontSize: 22 }}>📍</div>
         </div>
 
-        {/* Driver Card */}
-        <div className="bg-white rounded-3xl p-5 flex items-center gap-4 shadow-sm border border-slate-100">
-          <div className="w-14 h-14 bg-[#FFD60A] rounded-2xl flex items-center justify-center text-3xl shadow-inner shrink-0">👨‍⚕️</div>
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-1">
-              <p className="font-black text-slate-800 tracking-tight">Ramesh Kumar</p>
-              <span className="bg-green-100 text-green-700 text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md">Verified</span>
+        <div style={{ background: COLORS.card, borderRadius: 20, padding: 16, display: 'flex', alignItems: 'center', gap: 12, boxShadow: '0 10px 30px rgba(0,0,0,0.05)' }}>
+          <div style={{ width: 54, height: 54, borderRadius: 16, background: COLORS.primary, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, border: `2px solid rgba(255,215,0,0.35)` }}>👨‍⚕️</div>
+          <div style={{ flex: 1 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{ fontSize: 15, fontWeight: 900 }}>Ramesh Kumar</div>
+              <span style={{ background: 'rgba(76,175,80,0.12)', color: '#2e7d32', padding: '3px 7px', borderRadius: 999, fontSize: 8, fontWeight: 900, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Verified Paramedic</span>
             </div>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">MP04 AA 1234 • BLS</p>
+            <div style={{ fontSize: 11, color: COLORS.muted, marginTop: 3, fontWeight: 700 }}>MP04 AA 1234</div>
           </div>
-          <a href="tel:123" className="w-12 h-12 bg-[#FFD60A] rounded-2xl flex items-center justify-center text-black shadow-lg shadow-yellow-500/20 active:scale-90 transition-all">
-            <Phone className="w-5 h-5" />
-          </a>
+          <a href="tel:1234567890" style={{ width: 44, height: 44, borderRadius: 14, background: COLORS.primary, display: 'flex', alignItems: 'center', justifyContent: 'center', color: COLORS.text, boxShadow: '0 8px 20px rgba(255,215,0,0.2)' }}><Phone size={18} /></a>
         </div>
 
-        {/* Status Timeline */}
-        <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
+        <div style={{ background: COLORS.card, borderRadius: 20, padding: 16, boxShadow: '0 10px 30px rgba(0,0,0,0.05)' }}>
           {[
             { label: 'Booking Confirmed', status: 'done' },
-            { label: 'Nearest Ambulance Found', status: 'done' },
-            { label: 'Driver Dispatched', status: 'done' },
+            { label: 'Finding Nearest Ambulance', status: 'done' },
+            { label: 'Ambulance Dispatched', status: 'done' },
             { label: 'Driver En Route to You', status: 'active' },
-            { label: 'Arrived at Pickup', status: 'pending' }
-          ].map((step, i) => (
-            <div key={i} className="flex gap-4 relative">
-              {i < 4 && <div className={`absolute left-[13px] top-[24px] w-0.5 h-6 ${step.status === 'done' ? 'bg-green-500' : 'bg-slate-100'}`} />}
-              <div className={`w-7 h-7 rounded-full flex items-center justify-center z-10 shadow-sm shrink-0 ${step.status === 'done' ? 'bg-green-500 text-white' : step.status === 'active' ? 'bg-[#FFD60A] text-black ring-4 ring-yellow-100' : 'bg-slate-50 text-slate-300'}`}>
-                {step.status === 'done' ? <Check className="w-4 h-4" /> : <div className="w-2 h-2 rounded-full bg-current" />}
+            { label: 'Arrived at Pickup', status: 'pending' },
+          ].map((step, index) => (
+            <div key={step.label} style={{ display: 'flex', alignItems: 'center', gap: 10, paddingBottom: index < 4 ? 12 : 0 }}>
+              <div style={{ width: 24, height: 24, borderRadius: '50%', background: step.status === 'done' ? COLORS.success : step.status === 'active' ? COLORS.primary : '#ececec', color: step.status === 'done' ? '#fff' : step.status === 'active' ? COLORS.text : '#aaa', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                {step.status === 'done' ? <Check size={14} /> : <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'currentColor', display: 'block' }} />}
               </div>
-              <div className="pb-6">
-                <p className={`text-xs font-black uppercase tracking-widest ${step.status === 'pending' ? 'text-slate-300' : 'text-slate-800'}`}>{step.label}</p>
-                {step.status === 'active' && <p className="text-[9px] font-bold text-[#E53935] uppercase mt-1 animate-pulse">Expected in 7 mins</p>}
+              <div>
+                <div style={{ fontSize: 12, fontWeight: step.status === 'active' ? 900 : 700, color: step.status === 'pending' ? '#b0b0b0' : COLORS.text }}>{step.label}</div>
+                {step.status === 'active' ? <div style={{ fontSize: 10, color: COLORS.accent, fontWeight: 800, marginTop: 2 }}>Expected in 7 mins</div> : null}
               </div>
             </div>
           ))}
         </div>
 
-        {/* Booking ID */}
-        <div className="bg-slate-50 rounded-3xl p-5 border-2 border-dashed border-slate-200 flex justify-between items-center">
+        <div style={{ background: 'rgba(255,215,0,0.16)', border: '1px dashed rgba(255,215,0,0.45)', borderRadius: 18, padding: '14px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
-            <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Booking ID</p>
-            <p className="text-lg font-black text-slate-800 tracking-tighter">KW-AMB-{bookingId}</p>
+            <div style={{ fontSize: 10, fontWeight: 900, letterSpacing: '0.16em', textTransform: 'uppercase', color: COLORS.muted, marginBottom: 3 }}>Booking ID</div>
+            <div style={{ fontSize: 16, fontWeight: 900 }}>KW-AMB-{bookingId}</div>
           </div>
-          <button 
-            onClick={copyToClipboard}
-            className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${copied ? 'bg-green-500 text-white' : 'bg-white text-slate-800 shadow-sm'}`}
-          >
-            {copied ? <div className="flex items-center gap-1"><Check className="w-3 h-3" /> Copied</div> : <div className="flex items-center gap-1"><Copy className="w-3 h-3" /> Copy</div>}
-          </button>
+          <button onClick={copyToClipboard} style={{ border: 'none', background: copied ? COLORS.success : '#fff', color: copied ? '#fff' : COLORS.text, padding: '8px 12px', borderRadius: 999, fontSize: 11, fontWeight: 800, cursor: 'pointer' }}>{copied ? '✅ Copied' : '📋 Copy'}</button>
         </div>
 
-        {/* Pay Notice */}
-        <div className="bg-green-50 rounded-3xl p-5 border border-green-100 flex gap-4 items-center mb-8">
-          <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-2xl shadow-sm shrink-0">💳</div>
+        <div style={{ background: 'rgba(76,175,80,0.12)', border: '1px solid rgba(76,175,80,0.2)', borderRadius: 18, padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ fontSize: 24 }}>💳</div>
           <div>
-            <p className="font-black text-green-800 text-sm uppercase tracking-tight">Pay at Hospital</p>
-            <p className="text-[10px] font-bold text-green-600 uppercase tracking-widest opacity-80">No payment needed now. Focus on the patient.</p>
+            <div style={{ fontSize: 14, fontWeight: 900, color: '#2e7d32' }}>Pay at Hospital</div>
+            <div style={{ fontSize: 11, color: '#4d8c4d', fontWeight: 700 }}>No payment needed right now. Focus on the patient.</div>
           </div>
         </div>
 
-        <button 
-          onClick={() => { setFlow('select'); setSelectedService(null); }}
-          className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-black transition-colors"
-        >➔ Back to Home</button>
+        <button onClick={resetFlow} style={{ border: '1px solid #e2e2e2', background: '#fff', color: COLORS.muted, padding: '12px 14px', borderRadius: 999, fontSize: 11, fontWeight: 800, cursor: 'pointer', alignSelf: 'center', marginTop: 2 }}>← Back to Home</button>
       </div>
     </div>
   );
 
   return (
     <MobileFrame>
-      <div className="min-h-screen bg-[#F8FAFC]">
-        {flow === 'select' && <Header title="Ambulance" subtitle="Emergency Services" showBack onBack={() => navigate(-1)} />}
-        {flow === 'location' && <Header title={selectedService.type} subtitle="Select Location" showBack onBack={() => setFlow('select')} />}
-        {flow === 'tracking' && <Header title="Tracking" subtitle="Live Status" />}
-        
-        {flow === 'select' && renderSelect()}
-        {flow === 'location' && renderLocation()}
-        {flow === 'tracking' && renderTracking()}
+      <div style={{ minHeight: '100vh', background: COLORS.bg, paddingBottom: 90, fontFamily: 'Nunito, sans-serif' }}>
+        <style>{`
+          @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+          @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+          @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+          body { font-family: 'Nunito', sans-serif; }
+          button, a { -webkit-tap-highlight-color: transparent; }
+        `}</style>
+        <Header title={flow === 'select' ? '🚑 Ambulance' : flow === 'location' ? (selectedService?.type || 'Ambulance') : '🚑 Ambulance Tracking'} subtitle={flow === 'select' ? 'Select service type' : flow === 'location' ? 'Enter pickup & drop details' : 'Live status updates'} showBack={flow !== 'select'} onBack={() => (flow === 'location' ? setFlow('select') : navigate('/customer/home'))} />
+        {flow === 'select' ? renderSelect() : flow === 'location' ? renderLocation() : renderTracking()}
+        <SOSButton />
+        <BottomNav activeTab="services" />
       </div>
     </MobileFrame>
   );

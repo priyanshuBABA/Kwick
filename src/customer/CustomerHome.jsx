@@ -100,6 +100,14 @@ const CustomerHome = () => {
               onClick={() => navigate('/customer/doctors')} 
             />
             <ServiceCard 
+              title="Ambulance" 
+              icon="🚑" 
+              bg="bg-white" 
+              border="border-[#FFD60A]/30"
+              shadow="shadow-[0_10px_25px_-10px_rgba(255,214,10,0.35)]"
+              onClick={() => navigate('/customer/ambulance')} 
+            />
+            <ServiceCard 
               title="Medicines" 
               icon="💊" 
               bg="bg-white" 

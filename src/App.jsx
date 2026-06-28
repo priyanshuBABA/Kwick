@@ -9,6 +9,7 @@ import CustomerHome from './customer/CustomerHome';
 import CustomerCart from './customer/CustomerCart';
 import CustomerOrders from './customer/CustomerOrders';
 import CustomerProfile from './customer/CustomerProfile';
+import AmbulanceService from './customer/AmbulanceService';
 import PickDrop from './customer/PickDrop';
 import FreshMandi from './customer/FreshMandi';
 import Medicines from './customer/Medicines';
@@ -74,7 +75,8 @@ const App = () => {
       <Route path="/customer/pandi-ji-chai" element={<PandiJiChai />} />
       <Route path="/customer/electric-shop" element={<ElectricShop />} />
       <Route path="/customer/home-services" element={<HomeServices />} />
-      <Route path="/customer/services" element={<CustomerHome />} />
+      <Route path="/customer/services" element={<AmbulanceService />} />
+      <Route path="/customer/ambulance" element={<AmbulanceService />} />
       <Route path="/customer/track/:id" element={<OrderTracking />} />
       <Route path="/customer/doctors" element={<DoctorService />} />
       <Route path="/customer/stationery-gift" element={<StationeryGiftCenter />} />
