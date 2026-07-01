@@ -92,12 +92,12 @@ const CustomerHome = () => {
           {/* Service Grid (3x3 Ratio) */}
           <div className="grid grid-cols-3 gap-3 mb-10 animate-slideUp">
             <ServiceCard 
-              title="Doctors" 
-              icon="🩺" 
+              title="Doctor" 
+              icon="🏥" 
               bg="bg-white" 
               border="border-slate-100"
               shadow="shadow-sm"
-              onClick={() => navigate('/customer/doctors')} 
+              onClick={() => navigate('/customer/doctor')} 
             />
             <ServiceCard 
               title="Ambulance" 

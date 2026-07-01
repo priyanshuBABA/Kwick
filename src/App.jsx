@@ -10,6 +10,8 @@ import CustomerCart from './customer/CustomerCart';
 import CustomerOrders from './customer/CustomerOrders';
 import CustomerProfile from './customer/CustomerProfile';
 import AmbulanceService from './customer/AmbulanceService';
+import DoctorService from './customer/DoctorService';
+import LabService from './customer/LabService';
 import PickDrop from './customer/PickDrop';
 import FreshMandi from './customer/FreshMandi';
 import Medicines from './customer/Medicines';
@@ -17,7 +19,6 @@ import MishraJiCakes from './customer/MishraJiCakes';
 import HouseholdItems from './customer/HouseholdItems';
 import HomeServices from './customer/HomeServices';
 import OrderTracking from './customer/OrderTracking';
-import DoctorService from './customer/DoctorService';
 // import StationaryHub from './customer/stationary-app/App';
 import ElectricShop from './customer/ElectricShop';
 import PandiJiChai from './customer/PandiJiChai';
@@ -67,6 +68,9 @@ const App = () => {
       <Route path="/customer/profile" element={<CustomerProfile />} />
       <Route path="/customer/pick-drop" element={<PickDrop />} />
       <Route path="/customer/fresh-mandi" element={<FreshMandi />} />
+      <Route path="/customer/doctor" element={<DoctorService />} />
+      <Route path="/customer/labs" element={<LabService />} />
+      <Route path="/customer/services" element={<DoctorService />} />
       <Route path="/customer/medicines" element={<Medicines />} />
       <Route path="/customer/mishra-ji-cakes" element={<MishraJiCakes />} />
       <Route path="/customer/food-cakes" element={<MishraJiCakes />} />
@@ -75,10 +79,8 @@ const App = () => {
       <Route path="/customer/pandi-ji-chai" element={<PandiJiChai />} />
       <Route path="/customer/electric-shop" element={<ElectricShop />} />
       <Route path="/customer/home-services" element={<HomeServices />} />
-      <Route path="/customer/services" element={<AmbulanceService />} />
       <Route path="/customer/ambulance" element={<AmbulanceService />} />
       <Route path="/customer/track/:id" element={<OrderTracking />} />
-      <Route path="/customer/doctors" element={<DoctorService />} />
       <Route path="/customer/stationery-gift" element={<StationeryGiftCenter />} />
 
       {/* Rider Portal */}
