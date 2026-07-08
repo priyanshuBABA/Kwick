@@ -11,7 +11,6 @@ import CustomerOrders from './customer/CustomerOrders';
 import CustomerProfile from './customer/CustomerProfile';
 import AmbulanceService from './customer/AmbulanceService';
 import DoctorService from './customer/DoctorService';
-import LabService from './customer/LabService';
 import PickDrop from './customer/PickDrop';
 import FreshMandi from './customer/FreshMandi';
 import Medicines from './customer/Medicines';
@@ -19,23 +18,14 @@ import MishraJiCakes from './customer/MishraJiCakes';
 import HouseholdItems from './customer/HouseholdItems';
 import HomeServices from './customer/HomeServices';
 import OrderTracking from './customer/OrderTracking';
+import KwickLaundry from './customer/KwickLaundry';
 // import StationaryHub from './customer/stationary-app/App';
 import ElectricShop from './customer/ElectricShop';
 import PandiJiChai from './customer/PandiJiChai';
 import StationeryGiftCenter from './customer/StationeryGiftCenter';
+import KwickBooks from './customer/KwickBooks';
 
-// Rider Pages
-import RiderHome from './rider/RiderHome';
-import RiderOrders from './rider/RiderOrders';
-import RiderEarnings from './rider/RiderEarnings';
-import RiderProfile from './rider/RiderProfile';
-
-// Vendor Pages
-import VendorOrders from './vendor/VendorOrders';
-import VendorMenu from './vendor/VendorMenu';
-import VendorEarnings from './vendor/VendorEarnings';
-import VendorProfile from './vendor/VendorProfile';
-import VendorPortal from './vendor/VendorPortal';
+// Rider and Vendor pages have been removed — landing page will show role options only
 
 
 
@@ -69,7 +59,6 @@ const App = () => {
       <Route path="/customer/pick-drop" element={<PickDrop />} />
       <Route path="/customer/fresh-mandi" element={<FreshMandi />} />
       <Route path="/customer/doctor" element={<DoctorService />} />
-      <Route path="/customer/labs" element={<LabService />} />
       <Route path="/customer/services" element={<DoctorService />} />
       <Route path="/customer/medicines" element={<Medicines />} />
       <Route path="/customer/mishra-ji-cakes" element={<MishraJiCakes />} />
@@ -80,21 +69,12 @@ const App = () => {
       <Route path="/customer/electric-shop" element={<ElectricShop />} />
       <Route path="/customer/home-services" element={<HomeServices />} />
       <Route path="/customer/ambulance" element={<AmbulanceService />} />
+      <Route path="/customer/laundry" element={<KwickLaundry />} />
+      <Route path="/customer/kwick-books" element={<KwickBooks />} />
       <Route path="/customer/track/:id" element={<OrderTracking />} />
       <Route path="/customer/stationery-gift" element={<StationeryGiftCenter />} />
 
-      {/* Rider Portal */}
-      <Route path="/rider/home" element={<RiderHome />} />
-      <Route path="/rider/orders" element={<RiderOrders />} />
-      <Route path="/rider/earnings" element={<RiderEarnings />} />
-      <Route path="/rider/profile" element={<RiderProfile />} />
-
-      {/* Vendor Portal */}
-      <Route path="/vendor/portal" element={<VendorPortal />} />
-      <Route path="/vendor/orders" element={<VendorOrders />} />
-      <Route path="/vendor/menu" element={<VendorMenu />} />
-      <Route path="/vendor/earnings" element={<VendorEarnings />} />
-      <Route path="/vendor/profile" element={<VendorProfile />} />
+      {/* Rider and Vendor portals removed — landing page shows role selection only */}
 
       {/* RideGo App (Merged Sub-Project) */}
       <Route path="/ride-booking">

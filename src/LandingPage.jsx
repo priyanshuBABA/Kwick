@@ -92,7 +92,7 @@ const LandingPage = () => {
             icon={<Package />}
             color="bg-green-500"
             delay={300}
-            onClick={() => handleRoleSelect('/rider/home')}
+            onClick={() => handleRoleSelect('/')}
           />
 
           <RoleCard 
@@ -101,7 +101,7 @@ const LandingPage = () => {
             icon={<Store />}
             color="bg-orange-500"
             delay={500}
-            onClick={() => handleRoleSelect('/vendor/portal')}
+            onClick={() => handleRoleSelect('/')}
           />
         </div>
 

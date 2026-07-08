@@ -124,6 +124,14 @@ const CustomerHome = () => {
               onClick={() => navigate('/customer/stationery-gift')} 
             />
             <ServiceCard 
+              title="Kwick Books" 
+              icon="📚" 
+              bg="bg-white" 
+              border="border-amber-100"
+              shadow="shadow-[0_10px_25px_-10px_rgba(255,214,10,0.35)]"
+              onClick={() => navigate('/customer/kwick-books')} 
+            />
+            <ServiceCard 
               title="Pick & Drop" 
               icon="🛵" 
               bg="bg-white" 
@@ -186,6 +194,14 @@ const CustomerHome = () => {
               border="border-slate-100"
               shadow="shadow-sm"
               onClick={() => navigate('/customer/home-services')} 
+            />
+            <ServiceCard 
+              title="Laundry" 
+              icon="🧺" 
+              bg="bg-white" 
+              border="border-amber-100"
+              shadow="shadow-[0_10px_25px_-10px_rgba(255,214,10,0.35)]"
+              onClick={() => navigate('/customer/laundry')} 
             />
           </div>
 
