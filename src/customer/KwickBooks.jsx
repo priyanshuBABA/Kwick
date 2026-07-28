@@ -53,16 +53,19 @@ function calculateRentalPrice(mrp, days, factor) {
 }
 
 const categories = ['All', 'School', 'Engineering', 'Novels', 'Competitive'];
+const schoolBoards = ['All', 'CBSE', 'ICSE', 'State Board', 'NCERT'];
+const classOptions = ['All', 'Class 6', 'Class 7', 'Class 8', 'Class 9', 'Class 10', 'Class 11', 'Class 12'];
+const subjectOptions = ['All', 'Maths', 'Science', 'Physics', 'Chemistry', 'Biology', 'English', 'History', 'Geography'];
 
 const books = [
-  { id: 1, title: 'NCERT Physics Class 12', author: 'NCERT', category: 'School', mrp: 250, condition: 'Used - Good', cover: '📘', rating: 4.6, listingType: 'Used', seller: 'Ravi K.' },
-  { id: 2, title: 'Concepts of Physics Vol 1', author: 'H.C. Verma', category: 'Competitive', mrp: 450, condition: 'Used - Fair', cover: '📗', rating: 4.9, listingType: 'Used', seller: 'Priya S.' },
-  { id: 3, title: 'Data Structures & Algorithms', author: 'Narasimha Karumanchi', category: 'Engineering', mrp: 500, condition: 'New', cover: '📙', rating: 4.5, listingType: 'New', seller: 'Kwick Store' },
-  { id: 4, title: 'The Alchemist', author: 'Paulo Coelho', category: 'Novels', mrp: 299, condition: 'Used - Good', cover: '📕', rating: 4.8, listingType: 'Used', seller: 'Aman T.' },
-  { id: 5, title: 'CLAT Legal Reasoning', author: 'A.P. Bhardwaj', category: 'Competitive', mrp: 600, condition: 'New', cover: '📒', rating: 4.4, listingType: 'New', seller: 'Kwick Store' },
-  { id: 6, title: 'Objective Mathematics', author: 'R.D. Sharma', category: 'Competitive', mrp: 550, condition: 'Used - Good', cover: '📘', rating: 4.7, listingType: 'Used', seller: 'Sneha R.' },
-  { id: 7, title: 'Wren & Martin Grammar', author: 'P.C. Wren', category: 'School', mrp: 220, condition: 'New', cover: '📔', rating: 4.6, listingType: 'New', seller: 'Kwick Store' },
-  { id: 8, title: 'Let Us C', author: 'Yashavant Kanetkar', category: 'Engineering', mrp: 350, condition: 'Used - Fair', cover: '📓', rating: 4.3, listingType: 'Used', seller: 'Vikas P.' },
+  { id: 1, title: 'NCERT Physics Class 12', author: 'NCERT', category: 'School', school: 'CBSE', class: 'Class 12', subject: 'Physics', subtopic: 'Electricity', mrp: 250, condition: 'Used - Good', cover: '📘', rating: 4.6, listingType: 'Used', seller: 'Ravi K.' },
+  { id: 2, title: 'NCERT Maths Class 10', author: 'NCERT', category: 'School', school: 'CBSE', class: 'Class 10', subject: 'Maths', subtopic: 'Algebra', mrp: 220, condition: 'New', cover: '📗', rating: 4.8, listingType: 'New', seller: 'Kwick Store' },
+  { id: 3, title: 'Concepts of Physics Vol 1', author: 'H.C. Verma', category: 'Competitive', school: 'JEE', class: 'Competitive', subject: 'Physics', subtopic: 'Mechanics', mrp: 450, condition: 'Used - Fair', cover: '📙', rating: 4.9, listingType: 'Used', seller: 'Priya S.' },
+  { id: 4, title: 'Data Structures & Algorithms', author: 'Narasimha Karumanchi', category: 'Engineering', school: 'Engineering', class: 'Engineering', subject: 'Computer Science', subtopic: 'Arrays', mrp: 500, condition: 'New', cover: '📓', rating: 4.5, listingType: 'New', seller: 'Kwick Store' },
+  { id: 5, title: 'Wren & Martin Grammar', author: 'P.C. Wren', category: 'School', school: 'ICSE', class: 'Class 8', subject: 'English', subtopic: 'Grammar', mrp: 220, condition: 'New', cover: '📔', rating: 4.6, listingType: 'New', seller: 'Kwick Store' },
+  { id: 6, title: 'Objective Mathematics', author: 'R.D. Sharma', category: 'Competitive', school: 'SSC / Banking', class: 'Competitive', subject: 'Maths', subtopic: 'Quant', mrp: 550, condition: 'Used - Good', cover: '📘', rating: 4.7, listingType: 'Used', seller: 'Sneha R.' },
+  { id: 7, title: 'The Alchemist', author: 'Paulo Coelho', category: 'Novels', school: 'General', class: 'General', subject: 'Fiction', subtopic: 'Adventure', mrp: 299, condition: 'Used - Good', cover: '📕', rating: 4.8, listingType: 'Used', seller: 'Aman T.' },
+  { id: 8, title: 'Let Us C', author: 'Yashavant Kanetkar', category: 'Engineering', school: 'Engineering', class: 'Engineering', subject: 'Programming', subtopic: 'C Basics', mrp: 350, condition: 'Used - Fair', cover: '📒', rating: 4.3, listingType: 'Used', seller: 'Vikas P.' },
 ];
 
 const BackBar = ({ title, onBack }) => (
@@ -90,18 +93,38 @@ const inputClass = 'w-full rounded-xl border-2 border-slate-200 bg-white px-4 py
 function Discovery({ onOpenBook, onSell }) {
   const [query, setQuery] = useState('');
   const [cat, setCat] = useState('All');
+  const [board, setBoard] = useState('All');
+  const [classLevel, setClassLevel] = useState('All');
+  const [subject, setSubject] = useState('All');
+  const [subtopic, setSubtopic] = useState('All');
   const [mode, setMode] = useState('All');
 
-  const filtered = useMemo(
-    () =>
-      books.filter(
-        (b) =>
-          (cat === 'All' || b.category === cat) &&
-          (mode === 'All' || b.listingType === mode) &&
-          b.title.toLowerCase().includes(query.toLowerCase())
-      ),
-    [cat, mode, query]
-  );
+  const filtered = useMemo(() => {
+    return books.filter((b) => {
+      const haystack = `${b.title} ${b.author} ${b.school || ''} ${b.class || ''} ${b.subject || ''} ${b.subtopic || ''}`.toLowerCase();
+      return (
+        (cat === 'All' || b.category === cat) &&
+        (board === 'All' || b.school === board) &&
+        (classLevel === 'All' || b.class === classLevel) &&
+        (subject === 'All' || b.subject === subject) &&
+        (subtopic === 'All' || b.subtopic === subtopic) &&
+        (mode === 'All' || b.listingType === mode) &&
+        haystack.includes(query.toLowerCase())
+      );
+    });
+  }, [board, cat, classLevel, mode, query, subject, subtopic]);
+
+  const availableSubjects = useMemo(() => {
+    const candidates = books.filter((b) => (cat === 'All' || b.category === cat) && (board === 'All' || b.school === board));
+    return ['All', ...new Set(candidates.map((b) => b.subject).filter(Boolean))];
+  }, [board, cat]);
+
+  const availableSubtopics = useMemo(() => {
+    const candidates = books.filter((b) => {
+      return (cat === 'All' || b.category === cat) && (board === 'All' || b.school === board) && (classLevel === 'All' || b.class === classLevel) && (subject === 'All' || b.subject === subject);
+    });
+    return ['All', ...new Set(candidates.map((b) => b.subtopic).filter(Boolean))];
+  }, [board, cat, classLevel, subject]);
 
   return (
     <div className="min-h-screen bg-[#FFFBF2] pb-24">
@@ -122,34 +145,25 @@ function Discovery({ onOpenBook, onSell }) {
                 <br />
                 Rent smart. Save more.
               </h1>
-              <p className="mt-2 text-sm text-slate-500">Books ka circular economy — Munger students ke liye.</p>
+              <p className="mt-2 text-sm text-slate-500">School books, classes, subjects and subtopics — all in one place.</p>
 
               <div className="relative mt-5">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={17} />
                 <input
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search by title, author, subject"
+                  placeholder="Search by title, school, class, topic"
                   className="w-full rounded-2xl border border-amber-100 bg-white py-3.5 pl-11 pr-4 text-slate-800 shadow-sm outline-none placeholder-slate-400 focus:border-amber-400"
                 />
               </div>
             </div>
 
-            <div className="grid gap-2 rounded-2xl border border-amber-100 bg-white/80 p-3 shadow-sm sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
-              <div className="rounded-xl bg-amber-50 p-3">
-                <div className="flex items-center gap-2 text-sm font-black text-slate-900">
-                  <Sparkles size={15} className="text-amber-600" /> 100+ titles
+            <div className="rounded-2xl border border-amber-100 bg-white/80 p-3 shadow-sm">
+              <div className="rounded-xl bg-amber-50 p-3 text-sm font-black text-slate-900">
+                <div className="flex items-center gap-2">
+                  <Sparkles size={15} className="text-amber-600" /> Find books by school, class, subject & subtopic
                 </div>
-              </div>
-              <div className="rounded-xl bg-amber-50 p-3">
-                <div className="flex items-center gap-2 text-sm font-black text-slate-900">
-                  <BadgeCheck size={15} className="text-amber-600" /> Verified sellers
-                </div>
-              </div>
-              <div className="rounded-xl bg-amber-50 p-3">
-                <div className="flex items-center gap-2 text-sm font-black text-slate-900">
-                  <RefreshCcw size={15} className="text-amber-600" /> Easy exchange
-                </div>
+                <p className="mt-2 text-xs font-semibold text-slate-500">CBSE, ICSE, class 8 to 12, maths/science/english and chapter-wise topics.</p>
               </div>
             </div>
           </div>
@@ -159,11 +173,7 @@ function Discovery({ onOpenBook, onSell }) {
       <div className="mx-auto w-full max-w-6xl px-4 sm:px-5 lg:px-6">
         <div className="mb-3 flex gap-2 overflow-x-auto">
           {categories.map((c) => (
-            <button
-              key={c}
-              onClick={() => setCat(c)}
-              className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-bold transition-colors ${cat === c ? 'bg-slate-900 text-white' : 'border border-slate-200 bg-white text-slate-500'}`}
-            >
+            <button key={c} onClick={() => setCat(c)} className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-bold transition-colors ${cat === c ? 'bg-slate-900 text-white' : 'border border-slate-200 bg-white text-slate-500'}`}>
               {c}
             </button>
           ))}
@@ -175,15 +185,43 @@ function Discovery({ onOpenBook, onSell }) {
             { id: 'New', label: '🆕 New (Buy)' },
             { id: 'Used', label: '♻️ Pre-Owned (Buy/Rent)' },
           ].map((m) => (
-            <button
-              key={m.id}
-              onClick={() => setMode(m.id)}
-              className={`flex-1 rounded-xl py-2.5 text-xs font-bold transition-colors sm:text-sm ${mode === m.id ? 'bg-amber-400 text-slate-900' : 'text-slate-400'}`}
-            >
+            <button key={m.id} onClick={() => setMode(m.id)} className={`flex-1 rounded-xl py-2.5 text-xs font-bold transition-colors sm:text-sm ${mode === m.id ? 'bg-amber-400 text-slate-900' : 'text-slate-400'}`}>
               {m.label}
             </button>
           ))}
         </div>
+
+        <div className="mb-3 space-y-2 rounded-2xl border border-amber-100 bg-white p-3 shadow-sm">
+          <div className="flex flex-wrap gap-2">
+            {schoolBoards.map((item) => (
+              <button key={item} onClick={() => setBoard(item)} className={`rounded-full px-3 py-1.5 text-xs font-black ${board === item ? 'bg-slate-900 text-white' : 'bg-amber-50 text-slate-600'}`}>
+                {item}
+              </button>
+            ))}
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {classOptions.map((item) => (
+              <button key={item} onClick={() => setClassLevel(item)} className={`rounded-full px-3 py-1.5 text-xs font-black ${classLevel === item ? 'bg-amber-400 text-slate-900' : 'bg-slate-100 text-slate-600'}`}>
+                {item}
+              </button>
+            ))}
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {availableSubjects.map((item) => (
+              <button key={item} onClick={() => setSubject(item)} className={`rounded-full px-3 py-1.5 text-xs font-black ${subject === item ? 'bg-amber-500 text-slate-900' : 'bg-white text-slate-600 border border-slate-200'}`}>
+                {item}
+              </button>
+            ))}
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {availableSubtopics.map((item) => (
+              <button key={item} onClick={() => setSubtopic(item)} className={`rounded-full px-3 py-1.5 text-xs font-black ${subtopic === item ? 'bg-emerald-500 text-white' : 'bg-slate-50 text-slate-600'}`}>
+                {item}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <p className="mb-4 text-[11px] font-semibold text-slate-400 sm:text-xs">
           {mode === 'New' && 'Brand new books from Kwick Store — buy only.'}
           {mode === 'Used' && 'Sold by fellow students — buy to own, or rent for a fraction of the price.'}
@@ -201,7 +239,12 @@ function Discovery({ onOpenBook, onSell }) {
               </div>
               <p className="line-clamp-2 text-sm font-black leading-tight text-slate-900">{b.title}</p>
               <p className="mt-0.5 text-xs font-semibold text-slate-400">{b.author}</p>
-              <div className="mt-1 flex items-center gap-1 text-xs font-bold text-amber-500">
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                <span className="rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-black text-amber-700">{b.school || 'General'}</span>
+                <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-black text-slate-600">{b.class || 'All levels'}</span>
+                <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-black text-slate-600">{b.subject || 'Topic'}</span>
+              </div>
+              <div className="mt-2 flex items-center gap-1 text-xs font-bold text-amber-500">
                 <Star size={11} fill="currentColor" /> {b.rating}
                 <span className="font-normal text-slate-300">· {b.condition}</span>
               </div>
@@ -240,8 +283,14 @@ function BookDetail({ book, onBack, onBuy, onRent }) {
           <div>
             <h2 className="text-xl font-black text-slate-900">{book.title}</h2>
             <p className="mt-0.5 text-sm font-semibold text-slate-400">by {book.author}</p>
-            <div className="mt-3 flex flex-wrap items-center justify-center gap-3 lg:justify-start">
+            <div className="mt-3 flex flex-wrap items-center justify-center gap-2 lg:justify-start">
               <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-600">{book.condition}</span>
+              <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600">{book.school || 'General'}</span>
+              <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600">{book.class || 'All levels'}</span>
+              <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600">{book.subject || 'Topic'}</span>
+              <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600">{book.subtopic || 'Chapter'}</span>
+            </div>
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-3 lg:justify-start">
               <span className="flex items-center gap-1 text-xs font-bold text-slate-500">
                 <Star size={12} className="text-amber-400" fill="currentColor" /> {book.rating}
               </span>
@@ -302,8 +351,12 @@ function SellForm({ onBack, onSubmitted }) {
   const [mrp, setMrp] = useState('');
   const [price, setPrice] = useState('');
   const [condition, setCondition] = useState('Used - Good');
+  const [school, setSchool] = useState('CBSE');
+  const [classLevel, setClassLevel] = useState('Class 8');
+  const [subject, setSubject] = useState('Maths');
+  const [subtopic, setSubtopic] = useState('Algebra');
 
-  const canSubmit = title && author && mrp && price;
+  const canSubmit = title && author && mrp && price && school && classLevel && subject && subtopic;
 
   return (
     <div className="min-h-screen bg-[#FFFBF2] pb-28">
@@ -320,6 +373,7 @@ function SellForm({ onBack, onSubmitted }) {
               <input value={author} onChange={(e) => setAuthor(e.target.value)} className={inputClass} placeholder="e.g. H.C. Verma" />
             </div>
           </div>
+
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
               <label className="mb-1.5 block text-xs font-bold text-slate-500">MRP (₹)</label>
@@ -330,6 +384,35 @@ function SellForm({ onBack, onSubmitted }) {
               <input value={price} onChange={(e) => setPrice(e.target.value.replace(/\D/g, ''))} className={inputClass} placeholder="200" />
             </div>
           </div>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label className="mb-1.5 block text-xs font-bold text-slate-500">School / Board</label>
+              <select value={school} onChange={(e) => setSchool(e.target.value)} className={inputClass}>
+                {schoolBoards.filter((item) => item !== 'All').map((item) => (<option key={item} value={item}>{item}</option>))}
+              </select>
+            </div>
+            <div>
+              <label className="mb-1.5 block text-xs font-bold text-slate-500">Class</label>
+              <select value={classLevel} onChange={(e) => setClassLevel(e.target.value)} className={inputClass}>
+                {classOptions.filter((item) => item !== 'All').map((item) => (<option key={item} value={item}>{item}</option>))}
+              </select>
+            </div>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label className="mb-1.5 block text-xs font-bold text-slate-500">Subject</label>
+              <select value={subject} onChange={(e) => setSubject(e.target.value)} className={inputClass}>
+                {subjectOptions.filter((item) => item !== 'All').map((item) => (<option key={item} value={item}>{item}</option>))}
+              </select>
+            </div>
+            <div>
+              <label className="mb-1.5 block text-xs font-bold text-slate-500">Subtopic / Chapter</label>
+              <input value={subtopic} onChange={(e) => setSubtopic(e.target.value)} className={inputClass} placeholder="e.g. Algebra, Motion, Grammar" />
+            </div>
+          </div>
+
           <div>
             <label className="mb-1.5 block text-xs font-bold text-slate-500">Condition</label>
             <div className="grid gap-2 sm:grid-cols-3">
@@ -358,7 +441,28 @@ function SellForm({ onBack, onSubmitted }) {
       </div>
 
       <div className="fixed bottom-0 left-0 right-0 mx-auto max-w-md border-t border-amber-100 bg-white px-4 py-4 sm:px-5">
-        <PrimaryButton disabled={!canSubmit} onClick={onSubmitted}>
+        <PrimaryButton disabled={!canSubmit} onClick={() => {
+          const newEntry = {
+            id: Date.now(),
+            title,
+            author,
+            category: 'School',
+            school,
+            class: classLevel,
+            subject,
+            subtopic,
+            mrp: Number(mrp),
+            condition,
+            cover: '📚',
+            rating: 4.6,
+            listingType: 'Used',
+            seller: 'You',
+          };
+          const saved = JSON.parse(localStorage.getItem('kwickbook-service-listings-v1') || '[]');
+          const next = [newEntry, ...saved];
+          localStorage.setItem('kwickbook-service-listings-v1', JSON.stringify(next));
+          onSubmitted(next);
+        }}>
           Submit for Approval
         </PrimaryButton>
       </div>

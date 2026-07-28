@@ -124,12 +124,12 @@ const CustomerHome = () => {
               onClick={() => navigate('/customer/stationery-gift')} 
             />
             <ServiceCard 
-              title="Kwick Books" 
+              title="KwickBook" 
               icon="📚" 
               bg="bg-white" 
               border="border-amber-100"
               shadow="shadow-[0_10px_25px_-10px_rgba(255,214,10,0.35)]"
-              onClick={() => navigate('/customer/kwick-books')} 
+              onClick={() => navigate('/customer/kwickbook')} 
             />
             <ServiceCard 
               title="Pick & Drop" 

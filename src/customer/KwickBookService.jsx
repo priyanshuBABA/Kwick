@@ -194,7 +194,7 @@ function Discovery({ onOpenBook, onSell }) {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           {filtered.map((book) => (
             <button key={book.id} onClick={() => onOpenBook(book)} className="rounded-[1.5rem] border border-amber-100 bg-white p-3 text-left shadow-sm">
               <div className="mb-3 flex h-24 items-center justify-center rounded-2xl bg-[#FFF3D6] text-4xl">
