@@ -31,12 +31,12 @@ const CustomerProfile = () => {
   const wishlist = JSON.parse(localStorage.getItem('kwick-wishlist') || '[]');
 
   const menuItems = [
-    { icon: <MapPin className="w-5 h-5 text-slate-500" />, label: "Saved Addresses" },
-    { icon: <Wallet className="w-5 h-5 text-slate-500" />, label: "My Wallet", badge: `₹${walletBalance}` },
-    { icon: <Heart className="w-5 h-5 text-slate-500" />, label: "Wishlist", badge: wishlist.length },
-    { icon: <Percent className="w-5 h-5 text-slate-500" />, label: "Offers", badge: offers.length },
-    { icon: <RefreshCw className="w-5 h-5 text-slate-500" />, label: "Subscriptions" },
-    { icon: <HelpCircle className="w-5 h-5 text-slate-500" />, label: "Help & Support" },
+    { icon: <MapPin className="w-5 h-5 text-slate-500" />, label: "Saved Addresses", path: '/customer/profile/addresses' },
+    { icon: <Wallet className="w-5 h-5 text-slate-500" />, label: "My Wallet", path: '/customer/wallet', badge: `₹${walletBalance}` },
+    { icon: <Heart className="w-5 h-5 text-slate-500" />, label: "Wishlist", path: '/customer/wishlist', badge: wishlist.length },
+    { icon: <Percent className="w-5 h-5 text-slate-500" />, label: "Offers", path: '/customer/offers', badge: offers.length },
+    { icon: <RefreshCw className="w-5 h-5 text-slate-500" />, label: "Subscriptions", path: '/customer/profile/subscriptions' },
+    { icon: <HelpCircle className="w-5 h-5 text-slate-500" />, label: "Help & Support", path: '/customer/profile/help' },
   ];
 
   return (
@@ -65,7 +65,7 @@ const CustomerProfile = () => {
          {/* Menu List */}
          <div className="bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden pb-20">
             {menuItems.map((item, idx) => (
-              <div key={idx} className="flex items-center justify-between p-5 border-b border-slate-50 hover:bg-slate-50 transition-colors cursor-pointer group active:bg-slate-100">
+              <button key={idx} type="button" onClick={() => navigate(item.path)} className="w-full flex items-center justify-between p-5 border-b border-slate-50 hover:bg-slate-50 transition-colors cursor-pointer group active:bg-slate-100 text-left">
                 <div className="flex items-center gap-4">
                   <div className="p-2 bg-slate-100 rounded-xl group-hover:bg-white group-hover:shadow-sm transition-all">{item.icon}</div>
                   <span className="font-semibold text-navy text-sm">{item.label}</span>
@@ -74,7 +74,7 @@ const CustomerProfile = () => {
                   {item.badge && <span className="bg-green-100 text-green-700 font-bold text-xs px-2 py-1 rounded-md">{item.badge}</span>}
                   <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-primary transition-colors" />
                 </div>
-              </div>
+              </button>
             ))}
             
             <div 

@@ -29,6 +29,11 @@ import StationeryGiftCenter from './customer/services/StationeryGiftCenter';
 import KwickBookService from './customer/services/KwickBookService';
 import ServiceList from './customer/pages/ServiceList';
 import KwickPrint from './customer/services/KwickPrint';
+import KwickOffersPage from './customer/pages/KwickOffersPage';
+import KwickWishlistPage from './customer/pages/KwickWishlistPage';
+import KwickWalletPage from './customer/pages/KwickWalletPage';
+import ProfileOptionPage from './customer/pages/ProfileOptionPage';
+import KwickNotificationsPage from './customer/pages/KwickNotificationsPage';
 
 // Rider and Vendor pages have been removed — landing page will show role options only
 
@@ -75,6 +80,13 @@ const App = () => {
       <Route path="/customer/cart" element={<CustomerCart />} />
       <Route path="/customer/orders" element={<CustomerOrders />} />
       <Route path="/customer/profile" element={<CustomerProfile />} />
+      <Route path="/customer/offers" element={<KwickOffersPage />} />
+      <Route path="/customer/wishlist" element={<KwickWishlistPage />} />
+      <Route path="/customer/wallet" element={<KwickWalletPage />} />
+      <Route path="/customer/profile/addresses" element={<ProfileOptionPage />} />
+      <Route path="/customer/profile/subscriptions" element={<ProfileOptionPage />} />
+      <Route path="/customer/profile/help" element={<ProfileOptionPage />} />
+      <Route path="/customer/notifications" element={<KwickNotificationsPage />} />
       <Route path="/customer/pick-drop" element={<PickDrop />} />
       <Route path="/customer/fresh-mandi" element={<FreshMandi />} />
       <Route path="/customer/doctor" element={<DoctorService />} />
