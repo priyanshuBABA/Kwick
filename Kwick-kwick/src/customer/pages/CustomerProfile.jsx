@@ -13,7 +13,7 @@ const CustomerProfile = () => {
 
   const handleLogout = () => {
     logout();
-    navigate('/auth', { replace: true });
+    navigate('/role-selection', { replace: true });
   };
 
   const navItems = [

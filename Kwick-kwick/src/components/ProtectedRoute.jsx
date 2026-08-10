@@ -2,7 +2,11 @@ import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const ProtectedRoute = ({ role }) => {
-  const { user, token } = useAuth();
+  const { user, token, loading } = useAuth();
+
+  if (loading) {
+    return null;
+  }
 
   if (!token || !user) {
     return <Navigate to="/auth" replace />;

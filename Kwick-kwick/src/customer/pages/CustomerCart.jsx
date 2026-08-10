@@ -18,7 +18,8 @@ const CustomerCart = () => {
     placeOrder({
       items: cart,
       total: cartTotal,
-      storeName: cart[0]?.store || 'Munger Shop'
+      storeName: cart[0]?.store || 'Munger Shop',
+      service: cart[0]?.service || cart[0]?.store || cart[0]?.category || 'General'
     });
 
     // Clear cart and navigate

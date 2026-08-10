@@ -4,6 +4,7 @@ import {
   ArrowLeft,
   ArrowRight,
   CheckCircle2,
+  Home,
   MapPin,
   Plus,
   Search,
@@ -40,6 +41,21 @@ const initialBusinesses = [
   { name: "Electric Shop", owner: "Aman Kumar", city: "Jamalpur" },
   { name: "Doctor", owner: "Dr. Nisha", city: "Munger" },
 ];
+
+function VendorNav({ onHome }) {
+  return (
+    <nav className="vendor-nav" aria-label="KwickPartner navigation">
+      <button className="vendor-nav-brand" onClick={onHome} type="button">
+        <span className="vendor-nav-mark"><Store size={17} /></span>
+        <span>Kwick<span className="vendor-nav-dot">.</span>Partner</span>
+      </button>
+      <button className="vendor-nav-home" onClick={onHome} type="button">
+        <Home size={16} />
+        Home
+      </button>
+    </nav>
+  );
+}
 
 function Field({ label, children, error }) {
   return (
@@ -400,7 +416,6 @@ export default function KwickPartnerApp() {
       return null;
     }
   });
-
   useEffect(() => {
     try {
       if (loggedIn) {
@@ -434,21 +449,38 @@ export default function KwickPartnerApp() {
     logout();
     setLoggedIn(false);
     setLoggedCategory(null);
-    navigate('/auth', { replace: true });
+    navigate('/role-selection', { replace: true });
   }
+  function handleHome() {
+    setLoggedIn(false);
+    setLoggedCategory(null);
+    setShowPortal(false);
+    setCategory(null);
+    localStorage.removeItem("kwick_loggedIn");
+    localStorage.removeItem("kwick_loggedCategory");
+    navigate('/role-selection', { replace: true });
+  }
+
   if (loggedIn) {
     const selected = loggedCategory?.name || "";
     const normalized = selected.toLowerCase();
+    let servicePage;
     if (normalized.includes("book") || normalized.includes("books") || normalized.includes("stationary")) {
-      return <KwickBooksVendorApp onLogout={handleLogout} />;
+      servicePage = <KwickBooksVendorApp onLogout={handleLogout} />;
+    } else if (normalized.includes("ambulance")) {
+      servicePage = <AmbulanceDriverApp onLogout={handleLogout} />;
+    } else if (normalized.includes("doctor") || normalized.includes("medicine")) {
+      servicePage = <DocBookBiharDashboard onLogout={handleLogout} />;
+    } else {
+      servicePage = <KwickVendorDashboard onLogout={handleLogout} serviceName={selected} />;
     }
-    if (normalized.includes("ambulance")) {
-      return <AmbulanceDriverApp onLogout={handleLogout} />;
-    }
-    if (normalized.includes("doctor") || normalized.includes("medicine")) {
-      return <DocBookBiharDashboard onLogout={handleLogout} />;
-    }
-    return <KwickVendorDashboard onLogout={handleLogout} />;
+
+    return (
+      <div className="vendor-service-shell">
+        <VendorNav onHome={handleHome} />
+        {servicePage}
+      </div>
+    );
   }
 
   return showPortal ? <Portal category={category} onBack={handleBack} onLogin={handleLogin} /> : <Landing onSelect={handleSelect} onOpenPortal={handleSelect} />;

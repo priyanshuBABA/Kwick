@@ -33,13 +33,13 @@ const FreshMandi = () => {
       <div className="grid grid-cols-2 gap-4 p-4 pb-24">
         {products.freshMandi.map((product) => (
           <div key={product.id} className="w-full">
-            <ProductCard product={product} onAdd={addToCart} />
+            <ProductCard product={{ ...product, service: 'Fresh Mandi' }} onAdd={addToCart} />
           </div>
         ))}
         {/* DUPLICATE FOR ILLUSION OF MORE ITEMS */}
         {products.freshMandi.map((product) => (
           <div key={`dup-${product.id}`} className="w-full">
-            <ProductCard product={{...product, id: product.id + 100}} onAdd={addToCart} />
+            <ProductCard product={{...product, id: product.id + 100, service: 'Fresh Mandi' }} onAdd={addToCart} />
           </div>
         ))}
       </div>

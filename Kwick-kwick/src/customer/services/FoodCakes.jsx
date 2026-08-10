@@ -25,12 +25,12 @@ const FoodCakes = () => {
         <div className="grid grid-cols-2 gap-4">
           {products.foodCakes.map((product) => (
              <div key={product.id} className="w-full">
-              <ProductCard product={product} onAdd={addToCart} />
+              <ProductCard product={{ ...product, service: 'Mishra Ji Cake' }} onAdd={addToCart} />
              </div>
           ))}
           {products.foodCakes.map((product) => (
              <div key={`m-dup-${product.id}`} className="w-full">
-              <ProductCard product={{...product, id: product.id + 100}} onAdd={addToCart} />
+              <ProductCard product={{...product, id: product.id + 100, service: 'Mishra Ji Cake' }} onAdd={addToCart} />
              </div>
           ))}
         </div>

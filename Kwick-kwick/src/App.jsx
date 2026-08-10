@@ -2,7 +2,6 @@ import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 
 // Kwick Main Layouts/Pages
-import LandingPage from './LandingPage';
 import AuthPage from './pages/AuthPage';
 import RoleSelection from './pages/RoleSelection';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -63,17 +62,18 @@ import KwickPartnerApp from './vendor/KwickPartnerApp.jsx';
 const App = () => {
   return (
     <Routes>
-      {/* Root / Auth (show login/signup by default) */}
-      <Route path="/" element={<AuthPage />} />
+      {/* First screen: choose a role before entering the app. */}
+      <Route path="/" element={<RoleSelection />} />
       <Route path="/auth" element={<AuthPage />} />
       <Route path="/role-selection" element={<RoleSelection />} />
 
       {/* Protected role-based routes */}
       <Route element={<ProtectedRoute />}> 
         <Route path="/customer/dashboard" element={<CustomerHome />} />
-        <Route path="/vendor/dashboard" element={<KwickPartnerApp />} />
         <Route path="/rider/dashboard" element={<KwickRiderPage />} />
       </Route>
+
+      <Route path="/vendor/dashboard" element={<KwickPartnerApp />} />
 
       {/* Customer Portal */}
       <Route path="/customer/home" element={<CustomerHome />} />
@@ -83,6 +83,7 @@ const App = () => {
       <Route path="/customer/offers" element={<KwickOffersPage />} />
       <Route path="/customer/wishlist" element={<KwickWishlistPage />} />
       <Route path="/customer/wallet" element={<KwickWalletPage />} />
+      <Route path="/customer/rewards" element={<KwickWalletPage />} />
       <Route path="/customer/profile/addresses" element={<ProfileOptionPage />} />
       <Route path="/customer/profile/subscriptions" element={<ProfileOptionPage />} />
       <Route path="/customer/profile/help" element={<ProfileOptionPage />} />

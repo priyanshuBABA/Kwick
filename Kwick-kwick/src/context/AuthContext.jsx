@@ -1,6 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/auth';
+import { createContext, useContext, useEffect, useState } from 'react';
 
 const AuthContext = createContext(null);
 
@@ -8,7 +6,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem('kwick-token') || '');
   const [roles, setRoles] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const savedAuth = localStorage.getItem('kwick-auth');
@@ -22,6 +20,7 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem('kwick-auth');
       }
     }
+    setLoading(false);
   }, []);
 
   const login = (authData) => {
@@ -44,23 +43,11 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('kwick-auth');
     localStorage.removeItem('selected-role');
 
-    if (currentUser?.email && currentToken) {
-      try {
-        await fetch(`${API_URL}/logout`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${currentToken}`,
-          },
-          body: JSON.stringify({ email: currentUser.email, role: (currentUser.roles && currentUser.roles[0]) || 'customer' }),
-        });
-      } catch (error) {
-        console.error('Logout sync failed:', error);
-      }
-    }
+    // No remote logout needed for local mock auth-only mode.
+    // The app clears local storage and session state only.
   };
 
-  const value = useMemo(() => ({ user, token, roles, loading, setLoading, login, logout }), [user, token, roles, loading]);
+  const value = { user, token, roles, loading, setLoading, login, logout };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

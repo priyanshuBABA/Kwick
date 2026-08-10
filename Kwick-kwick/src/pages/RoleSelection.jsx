@@ -13,18 +13,14 @@ const RoleSelection = () => {
   const { user } = useAuth();
   const [selectedRole, setSelectedRole] = useState('customer');
   const assignedRoles = (user?.roles || []).filter(Boolean);
-  const roles = availableRoles.filter((role) => assignedRoles.includes(role.value));
+  const availableAssignedRoles = availableRoles.filter((role) => assignedRoles.includes(role.value));
+  const roles = availableAssignedRoles.length > 0 ? availableAssignedRoles : availableRoles;
 
   useEffect(() => {
-    if (!user) {
-      navigate('/auth');
-      return;
-    }
-
-    if (roles.length === 1) {
+    if (user && roles.length === 1) {
       const onlyRole = roles[0].value;
       localStorage.setItem('selected-role', onlyRole);
-      navigate(`/${onlyRole}/dashboard`);
+      navigate(`/${onlyRole}`);
     }
   }, [navigate, user, roles]);
 
@@ -40,7 +36,8 @@ const RoleSelection = () => {
     }
 
     localStorage.setItem('selected-role', selectedRole);
-    navigate(`/${selectedRole}/dashboard`);
+    const targetPath = selectedRole === 'customer' ? '/customer/home' : `/${selectedRole}`;
+    navigate(targetPath);
   };
 
   return (

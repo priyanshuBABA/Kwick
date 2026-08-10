@@ -113,9 +113,19 @@ const CustomerHome = () => {
                 </div>
               </div>
               <aside className="kwick-rail">
-                <section className="kwick-wallet-card"><p>Kwick Wallet</p><h3>₹{walletBalance.toLocaleString('en-IN')}</h3><p>Available balance</p><div className="kwick-wallet-actions"><button>Add Money</button><button>Transfer</button></div></section>
+                <div onClick={() => navigate('/customer/wallet')} className="kwick-wallet-card cursor-pointer" role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') navigate('/customer/wallet'); }}>
+                  <p>Kwick Wallet</p>
+                  <h3>₹{walletBalance.toLocaleString('en-IN')}</h3>
+                  <p>Available balance</p>
+                  <div className="kwick-wallet-actions"><button type="button" onClick={(e) => e.stopPropagation()}>Add Money</button><button type="button" onClick={(e) => e.stopPropagation()}>Transfer</button></div>
+                </div>
                 <section className="kwick-rail-card"><div className="rail-title"><h3>Recent Orders</h3><button onClick={() => navigate('/customer/orders')}>All</button></div><OrderRow icon="🛒" {...recentOrders[0]} /><OrderRow icon="💊" {...recentOrders[1]} /></section>
-                <section className="kwick-rail-card kwick-rewards"><div className="rail-title"><h3>Reward Points</h3><span>🏅</span></div><div className="reward-value">{rewardPoints.toLocaleString('en-IN')} <small>pts</small></div><div className="kwick-progress"><span /></div><p>520 pts away from Gold tier</p></section>
+                <div onClick={() => navigate('/customer/rewards')} className="kwick-rail-card kwick-rewards cursor-pointer" role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') navigate('/customer/rewards'); }}>
+                  <div className="rail-title"><h3>Reward Points</h3><span>🏅</span></div>
+                  <div className="reward-value">{rewardPoints.toLocaleString('en-IN')} <small>pts</small></div>
+                  <div className="kwick-progress"><span /></div>
+                  <p>520 pts away from Gold tier</p>
+                </div>
               </aside>
             </div>
           </div>

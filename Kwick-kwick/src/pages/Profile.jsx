@@ -10,7 +10,7 @@ const Profile = () => {
 
   const handleLogout = () => {
     logout();
-    navigate('/auth', { replace: true });
+    navigate('/role-selection', { replace: true });
   };
 
   const menuSections = [

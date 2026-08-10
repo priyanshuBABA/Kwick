@@ -1078,7 +1078,7 @@ export default function KwickRiderPage() {
     logout();
     setStage('auth'); setTab('home'); setOnline(false); setPendingOrder(null);
     setActiveOrder(null); setHistory([]); setRider({});
-    navigate('/auth', { replace: true });
+    navigate('/role-selection', { replace: true });
   };
 
   if (stage === 'auth') return <AuthScreen onAuthed={handleAuthed} />;

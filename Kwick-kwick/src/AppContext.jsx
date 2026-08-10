@@ -35,6 +35,7 @@ export const AppProvider = ({ children }) => {
   // Add a new delivery order request (from Customer Cart)
   // This goes to BOTH Vendor and Rider (Customer -> Platform)
   const placeOrder = (order) => {
+    const service = order.service || order.items?.[0]?.service || order.storeName || 'General';
     const newOrder = {
       id: `ORD${Math.floor(Math.random() * 9000) + 1000}`,
       type: 'delivery',
@@ -48,12 +49,17 @@ export const AppProvider = ({ children }) => {
       isAcceptedByVendor: false,
       isAcceptedByRider: false,
       paymentMethod: order.paymentMethod || 'Cash on Delivery'
+      ,service
     };
 
     setVendorOrders(prev => [...prev, newOrder]);
     setOrderRequests(prev => [...prev, newOrder]);
 
     return newOrder;
+  };
+
+  const rejectAsVendor = (orderId) => {
+    setVendorOrders(prev => prev.filter(order => order.id !== orderId));
   };
 
   // Vendor Action
@@ -102,6 +108,7 @@ export const AppProvider = ({ children }) => {
       placeOrder,
       addRideRequest,
       acceptAsVendor,
+      rejectAsVendor,
       acceptAsRider,
       rejectTask,
       riderAcceptedTask,

@@ -4,6 +4,7 @@ import {
   Clock, IndianRupee, LogOut, Camera, Bell, TrendingUp,
   CreditCard, Edit3, ListChecks, Power,
 } from "lucide-react";
+import { useAppContext } from "../AppContext";
 
 const amberGrad = "linear-gradient(135deg,#FFD54A,#F5A623)";
 
@@ -149,14 +150,22 @@ function DashboardHome({ storeOpen, setStoreOpen, newOrders, onGoOrders }) {
   );
 }
 
-function OrdersPage({ newOrders, setNewOrders, active, setActive }) {
+function OrdersPage({ newOrders, setNewOrders, active, setActive, onAcceptLive, onRejectLive }) {
   const [tab, setTab] = useState("New");
 
   const accept = (order) => {
+    if (order.sourceId && onAcceptLive) {
+      onAcceptLive(order.sourceId);
+      return;
+    }
     setNewOrders((o) => o.filter((x) => x.id !== order.id));
     setActive((a) => [...a, { ...order, status: "Preparing" }]);
   };
   const reject = (order) => {
+    if (order.sourceId && onRejectLive) {
+      onRejectLive(order.sourceId);
+      return;
+    }
     setNewOrders((o) => o.filter((x) => x.id !== order.id));
   };
   const markReady = (order) => {
@@ -368,11 +377,37 @@ function ProfilePage({ onLogout }) {
   );
 }
 
-export default function KwickVendorDashboard({ onLogout }) {
+export default function KwickVendorDashboard({ onLogout, serviceName = "" }) {
   const [tab, setTab] = useState("Home");
   const [storeOpen, setStoreOpen] = useState(true);
   const [newOrders, setNewOrders] = useState(initialNew);
   const [active, setActive] = useState(initialActive);
+  const { vendorOrders, acceptAsVendor, rejectAsVendor } = useAppContext();
+  const normalizedService = serviceName.toLowerCase().trim();
+  const matchingOrders = vendorOrders.filter((order) => {
+    if (!normalizedService || normalizedService === "general") return true;
+    const orderService = String(order.service || "").toLowerCase().trim();
+    return orderService === normalizedService || orderService.includes(normalizedService) || normalizedService.includes(orderService);
+  });
+  const liveNewOrders = matchingOrders
+    .filter((order) => order.status === "pending")
+    .map((order) => ({
+      sourceId: order.id,
+      id: order.id,
+      items: order.items.map((item) => `${item.quantity || 1}x ${item.name || item.title || "Item"}`),
+      amount: order.total,
+    }));
+  const liveActiveOrders = matchingOrders
+    .filter((order) => order.status !== "pending" && order.status !== "Cancelled")
+    .map((order) => ({
+      sourceId: order.id,
+      id: order.id,
+      items: order.items.map((item) => `${item.quantity || 1}x ${item.name || item.title || "Item"}`),
+      amount: order.total,
+      status: order.status,
+    }));
+  const displayedNewOrders = [...liveNewOrders, ...newOrders];
+  const displayedActiveOrders = [...liveActiveOrders, ...active];
 
   const navItems = [
     { name: "Home", Icon: Store },
@@ -389,17 +424,18 @@ export default function KwickVendorDashboard({ onLogout }) {
           <DashboardHome
             storeOpen={storeOpen}
             setStoreOpen={setStoreOpen}
-            newOrders={newOrders}
+            newOrders={displayedNewOrders}
             onGoOrders={() => setTab("Orders")}
           />
         )}
         {tab === "Orders" && (
           <OrdersPage
-            newOrders={newOrders}
+            newOrders={displayedNewOrders}
             setNewOrders={setNewOrders}
-            active={active}
-            active={active}
+            active={displayedActiveOrders}
             setActive={setActive}
+            onAcceptLive={acceptAsVendor}
+            onRejectLive={rejectAsVendor}
           />
         )}
         {tab === "Earnings" && <EarningsPage />}

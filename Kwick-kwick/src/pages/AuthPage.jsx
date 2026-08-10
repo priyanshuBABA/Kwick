@@ -20,9 +20,9 @@ const AuthPage = () => {
     if (user) {
       const selectedRole = localStorage.getItem('selected-role');
       if (selectedRole) {
-        navigate(`/${selectedRole}/dashboard`);
+        navigate(`/${selectedRole}/dashboard`, { replace: true });
       } else if (user.roles?.length === 1) {
-        navigate(`/${user.roles[0]}/dashboard`);
+        navigate(`/${user.roles[0]}/dashboard`, { replace: true });
       }
     }
   }, [user, navigate]);
@@ -58,11 +58,11 @@ const AuthPage = () => {
       const roles = result.roles || [];
       const selectedRole = localStorage.getItem('selected-role');
       if (selectedRole && roles.includes(selectedRole)) {
-        navigate(`/${selectedRole}/dashboard`);
+        navigate(`/${selectedRole}/dashboard`, { replace: true });
       } else if (roles.length === 1) {
-        navigate(`/${roles[0]}/dashboard`);
+        navigate(`/${roles[0]}/dashboard`, { replace: true });
       } else {
-        navigate('/role-selection');
+        navigate('/role-selection', { replace: true });
       }
     } catch (err) {
       setError(err?.response?.data?.message || 'Something went wrong. Please try again.');
