@@ -73,6 +73,53 @@ const initialCategoryItems = {
   ]
 };
 
+const initialOffers = [
+  {
+    id: 'OFFER-101',
+    code: 'SAVE20',
+    title: '20% OFF Ambulance & Rides',
+    description: 'Flat 20% discount on emergency ambulance and local bike ride bookings.',
+    discount: '20% OFF',
+    category: 'Ambulance & RideGo',
+    expiry: '31 Aug 2026',
+    status: 'Active',
+    usageCount: 1240
+  },
+  {
+    id: 'OFFER-102',
+    code: 'FREEDEL',
+    title: 'Free Express Delivery',
+    description: 'Free home delivery on Fresh Mandi & Mishra Ji Cake orders above ₹499.',
+    discount: 'Free Shipping',
+    category: 'Fresh Mandi & Cakes',
+    expiry: '15 Sep 2026',
+    status: 'Active',
+    usageCount: 890
+  },
+  {
+    id: 'OFFER-103',
+    code: 'KWICKHEALTH',
+    title: 'Flat ₹100 Off Doctor Visit',
+    description: 'Discount on online physician appointment booking & medicine orders.',
+    discount: '₹100 OFF',
+    category: 'Doctor & Medicines',
+    expiry: '10 Sep 2026',
+    status: 'Active',
+    usageCount: 430
+  },
+  {
+    id: 'OFFER-104',
+    code: 'KWICKBOOKS',
+    title: '15% Off Book Rentals & Stationery',
+    description: 'Special student discount on Class 10 NCERT books & school supplies.',
+    discount: '15% OFF',
+    category: 'Kwick.Books & Stationery',
+    expiry: '05 Oct 2026',
+    status: 'Active',
+    usageCount: 310
+  }
+];
+
 const initialVendors = [
   {
     id: 'VND-101',
@@ -229,10 +276,39 @@ const initialRiders = [
 export const AdminProvider = ({ children }) => {
   const [categories, setCategories] = useState(initialCategories);
   const [categoryItems, setCategoryItems] = useState(initialCategoryItems);
+  const [offers, setOffers] = useState(initialOffers);
   const [vendors, setVendors] = useState(initialVendors);
   const [customers, setCustomers] = useState(initialCustomers);
   const [riders, setRiders] = useState(initialRiders);
   const [activeTab, setActiveTab] = useState('overview');
+
+  // Ongoing Offers CRUD
+  const addOffer = (offerData) => {
+    const newOffer = {
+      id: `OFFER-${Date.now()}`,
+      status: 'Active',
+      usageCount: 0,
+      ...offerData
+    };
+    setOffers(prev => [newOffer, ...prev]);
+  };
+
+  const updateOffer = (id, updatedFields) => {
+    setOffers(prev => prev.map(o => o.id === id ? { ...o, ...updatedFields } : o));
+  };
+
+  const deleteOffer = (id) => {
+    setOffers(prev => prev.filter(o => o.id !== id));
+  };
+
+  const toggleOfferStatus = (id) => {
+    setOffers(prev => prev.map(o => {
+      if (o.id === id) {
+        return { ...o, status: o.status === 'Active' ? 'Inactive' : 'Active' };
+      }
+      return o;
+    }));
+  };
 
   // Business Category CRUD
   const addCategory = (catData) => {
@@ -415,11 +491,16 @@ export const AdminProvider = ({ children }) => {
       value={{
         categories,
         categoryItems,
+        offers,
         vendors,
         customers,
         riders,
         activeTab,
         setActiveTab,
+        addOffer,
+        updateOffer,
+        deleteOffer,
+        toggleOfferStatus,
         addCategory,
         updateCategory,
         deleteCategory,
