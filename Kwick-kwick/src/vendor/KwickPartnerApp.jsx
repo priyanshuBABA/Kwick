@@ -18,6 +18,7 @@ import KwickBooksVendorApp from "./KwickBooksVendor.jsx";
 import DocBookBiharDashboard from "./DocBookBiharDashboard.jsx";
 import AmbulanceDriverApp from "./AmbulanceDriverApp.jsx";
 import { useAuth } from "../context/AuthContext";
+import { getOffersByDomain } from "../utils/offersService";
 import "./vendor.css";
 
 const categories = [
@@ -64,6 +65,46 @@ function Field({ label, children, error }) {
       {children}
       {error ? <span className="field-error">{error}</span> : null}
     </label>
+  );
+}
+
+function VendorLiveOffersSection() {
+  const [offers, setOffers] = useState(() => getOffersByDomain('vendor'));
+
+  useEffect(() => {
+    const handleUpdate = () => setOffers(getOffersByDomain('vendor'));
+    window.addEventListener('kwick_offers_updated', handleUpdate);
+    return () => window.removeEventListener('kwick_offers_updated', handleUpdate);
+  }, []);
+
+  if (offers.length === 0) return null;
+
+  return (
+    <div className="section-card business-list" style={{ marginTop: '1.5rem', background: 'linear-gradient(135deg, #fffbeb, #fef3c7)', border: '1px solid #fde68a' }}>
+      <div className="section-heading">
+        <div>
+          <h3 style={{ color: '#92400e', display: 'flex', itemsAlign: 'center', gap: '0.5rem' }}>
+            📢 Live Platform Offers & Merchant Campaigns
+          </h3>
+          <p style={{ color: '#b45309' }}>Active promotional discounts configured by Super Admin</p>
+        </div>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem', marginTop: '0.75rem' }}>
+        {offers.map(o => (
+          <div key={o.id} style={{ background: '#ffffff', padding: '1rem', borderRadius: '1rem', border: '1px solid #fef3c7', shadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
+            <span style={{ background: '#78350f', color: '#ffffff', padding: '0.2rem 0.5rem', borderRadius: '0.375rem', fontWeight: '800', fontSize: '0.75rem', fontFamily: 'monospace' }}>
+              {o.code}
+            </span>
+            <h4 style={{ margin: '0.5rem 0 0.25rem 0', fontWeight: '700', fontSize: '0.9rem', color: '#1e293b' }}>{o.title}</h4>
+            <p style={{ fontSize: '0.75rem', color: '#64748b', margin: 0 }}>{o.description}</p>
+            <div style={{ marginTop: '0.5rem', display: 'flex', justify: 'space-between', fontSize: '0.7rem', fontWeight: '700', color: '#d97706' }}>
+              <span>{o.discount}</span>
+              <span>Expires {o.expiry}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -235,6 +276,8 @@ function Landing({ onSelect, onOpenPortal }) {
               <div className="empty-state">No businesses yet. Be the first to register.</div>
             )}
           </div>
+
+          <VendorLiveOffersSection />
         </section>
       </main>
 

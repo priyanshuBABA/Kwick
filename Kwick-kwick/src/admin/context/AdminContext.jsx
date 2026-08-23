@@ -273,16 +273,18 @@ const initialRiders = [
   }
 ];
 
+import { getLiveOffers, saveLiveOffers } from '../../utils/offersService';
+
 export const AdminProvider = ({ children }) => {
   const [categories, setCategories] = useState(initialCategories);
   const [categoryItems, setCategoryItems] = useState(initialCategoryItems);
-  const [offers, setOffers] = useState(initialOffers);
+  const [offers, setOffers] = useState(getLiveOffers);
   const [vendors, setVendors] = useState(initialVendors);
   const [customers, setCustomers] = useState(initialCustomers);
   const [riders, setRiders] = useState(initialRiders);
   const [activeTab, setActiveTab] = useState('overview');
 
-  // Ongoing Offers CRUD
+  // Ongoing Offers CRUD with live broadcast sync
   const addOffer = (offerData) => {
     const newOffer = {
       id: `OFFER-${Date.now()}`,
@@ -290,24 +292,40 @@ export const AdminProvider = ({ children }) => {
       usageCount: 0,
       ...offerData
     };
-    setOffers(prev => [newOffer, ...prev]);
+    setOffers(prev => {
+      const next = [newOffer, ...prev];
+      saveLiveOffers(next);
+      return next;
+    });
   };
 
   const updateOffer = (id, updatedFields) => {
-    setOffers(prev => prev.map(o => o.id === id ? { ...o, ...updatedFields } : o));
+    setOffers(prev => {
+      const next = prev.map(o => o.id === id ? { ...o, ...updatedFields } : o);
+      saveLiveOffers(next);
+      return next;
+    });
   };
 
   const deleteOffer = (id) => {
-    setOffers(prev => prev.filter(o => o.id !== id));
+    setOffers(prev => {
+      const next = prev.filter(o => o.id !== id);
+      saveLiveOffers(next);
+      return next;
+    });
   };
 
   const toggleOfferStatus = (id) => {
-    setOffers(prev => prev.map(o => {
-      if (o.id === id) {
-        return { ...o, status: o.status === 'Active' ? 'Inactive' : 'Active' };
-      }
-      return o;
-    }));
+    setOffers(prev => {
+      const next = prev.map(o => {
+        if (o.id === id) {
+          return { ...o, status: o.status === 'Active' ? 'Inactive' : 'Active' };
+        }
+        return o;
+      });
+      saveLiveOffers(next);
+      return next;
+    });
   };
 
   // Business Category CRUD

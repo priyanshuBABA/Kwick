@@ -9,6 +9,7 @@ import {
   CreditCard, LifeBuoy, MessageSquare, ScrollText, UserCog
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { getOffersByDomain } from '../utils/offersService';
 
 /* ------------------------------------------------------------------ */
 /*  Design tokens — LIGHT THEME                                        */
@@ -484,6 +485,48 @@ function OrderRequestPopup({ order, onAccept, onReject }) {
   );
 }
 
+function RiderLiveOffersCard() {
+  const [offers, setOffers] = useState(() => getOffersByDomain('rider'));
+
+  useEffect(() => {
+    const handleUpdate = () => setOffers(getOffersByDomain('rider'));
+    window.addEventListener('kwick_offers_updated', handleUpdate);
+    return () => window.removeEventListener('kwick_offers_updated', handleUpdate);
+  }, []);
+
+  if (offers.length === 0) return null;
+
+  return (
+    <Card style={{ padding: 16, background: 'linear-gradient(135deg, #FFFBEB, #FEF3C7)', borderColor: '#FDE68A' }}>
+      <div className="flex items-center justify-between mb-2">
+        <p className="font-extrabold text-sm flex items-center gap-1.5" style={{ color: '#92400E' }}>
+          🎁 Live Rider Promos & Demand Surge Boosts
+        </p>
+        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: '#78350F', color: '#FFF' }}>
+          ADMIN LIVE
+        </span>
+      </div>
+      <div className="space-y-2 mt-2">
+        {offers.map(o => (
+          <div key={o.id} className="p-2.5 rounded-xl border bg-white flex items-center justify-between shadow-sm" style={{ borderColor: '#FEF3C7' }}>
+            <div>
+              <span className="font-mono font-bold text-xs px-2 py-0.5 rounded" style={{ background: '#FEF3C7', color: '#B45309' }}>
+                {o.code}
+              </span>
+              <p className="font-bold text-xs mt-1" style={{ color: '#1E293B' }}>{o.title}</p>
+              <p className="text-[11px]" style={{ color: '#64748B' }}>{o.description}</p>
+            </div>
+            <div className="text-right">
+              <span className="font-extrabold text-xs block" style={{ color: '#D97706' }}>{o.discount}</span>
+              <span className="text-[10px]" style={{ color: '#94A3B8' }}>Exp: {o.expiry}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </Card>
+  );
+}
+
 function Home({ online, setOnline, stats, setPendingOrder, activeOrder, goToOrders, rider, loc }) {
   const spawnTimer = useRef(null);
   useEffect(() => {
@@ -538,6 +581,9 @@ function Home({ online, setOnline, stats, setPendingOrder, activeOrder, goToOrde
           <p className="text-sm font-medium" style={{ color: C.green }}>15 services live near you — stay sharp!</p>
         </div>
       )}
+
+      {/* Live Admin Rider Incentive & Promo Offers */}
+      <RiderLiveOffersCard />
 
       {activeOrder && (
         <Card style={{ padding: 16, borderColor: C.gold }}>

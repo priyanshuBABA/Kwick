@@ -176,10 +176,20 @@ function CouponCard({ coupon }) {
   return <article className="flex flex-col gap-4 rounded-2xl border border-orange-100 bg-white p-4 shadow-sm transition-shadow hover:shadow-md sm:flex-row sm:items-center sm:justify-between"><div className="flex items-center gap-3"><div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-orange-50 text-xl">{coupon.icon}</div><div><span className="rounded-md border border-dashed border-[#FF6B00] px-2 py-0.5 text-xs font-bold text-[#FF6B00]">{coupon.code}</span><p className="mt-1 text-sm font-bold text-gray-900">{coupon.title}</p><p className="text-xs text-gray-500">{coupon.detail}</p></div></div><CopyButton code={coupon.code} /></article>;
 }
 
+import { getOffersByDomain } from '../../utils/offersService';
+
 export default function KwickOffersPage() {
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('All');
+  const [adminOffers, setAdminOffers] = useState(() => getOffersByDomain('customer'));
   const countdown = useCountdown(11);
+
+  useEffect(() => {
+    const handleUpdate = () => setAdminOffers(getOffersByDomain('customer'));
+    window.addEventListener('kwick_offers_updated', handleUpdate);
+    return () => window.removeEventListener('kwick_offers_updated', handleUpdate);
+  }, []);
+
   const navItems = [
     { icon: Home, label: 'Home', path: '/customer/home' },
     { icon: ShoppingBag, label: 'Orders', path: '/customer/orders' },
@@ -187,12 +197,23 @@ export default function KwickOffersPage() {
     { icon: User, label: 'Profile', path: '/customer/profile' },
   ];
 
-  const filteredCoupons = useMemo(() => COUPONS.filter((coupon) => {
+  const allCoupons = useMemo(() => {
+    const dynamicCoupons = adminOffers.map(o => ({
+      code: o.code,
+      title: o.title,
+      detail: `${o.description} (${o.discount}) • Expires ${o.expiry}`,
+      category: 'All',
+      icon: '🏷️'
+    }));
+    return [...dynamicCoupons, ...COUPONS];
+  }, [adminOffers]);
+
+  const filteredCoupons = useMemo(() => allCoupons.filter((coupon) => {
     const matchesCategory = category === 'All' || coupon.category === category || coupon.category === 'All';
     const query = search.trim().toLowerCase();
     const matchesSearch = !query || `${coupon.code} ${coupon.title} ${coupon.detail}`.toLowerCase().includes(query);
     return matchesCategory && matchesSearch;
-  }), [search, category]);
+  }), [search, category, allCoupons]);
 
   return (
     <div className="min-h-screen bg-[#FFF3E9] pb-24">
