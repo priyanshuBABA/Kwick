@@ -58,6 +58,8 @@ import RideNotifications from './pages/Notifications';
 import KwickRiderPage from './pages/KwickRiderPage';
 // Vendor portal (integrated)
 import KwickPartnerApp from './vendor/KwickPartnerApp.jsx';
+// Admin Dashboard
+import AdminDashboard from './admin/AdminDashboard';
 
 const App = () => {
   return (
@@ -113,6 +115,9 @@ const App = () => {
 
       {/* Vendor portal (integrated from vendor subproject) */}
       <Route path="/vendor" element={<KwickPartnerApp />} />
+
+      {/* Super Admin Portal */}
+      <Route path="/admin" element={<AdminDashboard />} />
 
       {/* RideGo App (Merged Sub-Project) */}
       <Route path="/ride-booking">

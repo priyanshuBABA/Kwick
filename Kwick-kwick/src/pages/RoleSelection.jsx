@@ -6,6 +6,7 @@ const availableRoles = [
   { value: 'customer', label: 'Customer', description: 'Browse services and place orders' },
   { value: 'vendor', label: 'Vendor', description: 'Manage your business and inventory' },
   { value: 'rider', label: 'Rider', description: 'Accept delivery tasks and earn' },
+  { value: 'admin', label: 'Super Admin', description: 'Master control over Customers, Vendors, & Riders' },
 ];
 
 const RoleSelection = () => {
