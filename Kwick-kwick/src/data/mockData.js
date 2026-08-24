@@ -16,7 +16,7 @@ export const products = {
     { id: "FC4", name: "Black Forest Cake", image: "https://loremflickr.com/400/400/forest,cake,fresh", price: 400, weight: "500 g", emoji: "🍰" },
     { id: "FC5", name: "Gulab Jamun (2pc)", image: "https://loremflickr.com/400/400/sweet,fresh", price: 40, weight: "1 plate", emoji: "🍡" },
     { id: "FC6", name: "Crispy Samosa", image: "https://loremflickr.com/400/400/samosa,fresh", price: 15, weight: "1 pc", emoji: "🥟" }
-  ],
+  ], 
   medicines: [
     { id: "MED1", name: "Paracetamol 500mg", image: "https://loremflickr.com/400/400/pills,fresh", price: 15, weight: "10 tablets", emoji: "💊" },
     { id: "MED2", name: "Vitamin C", image: "https://loremflickr.com/400/400/vitamin,fresh", price: 45, weight: "15 tablets", emoji: "🍊" }
