@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useMemo, useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import MobileFrame from '../../components/MobileFrame';
 import BottomNav from '../../components/BottomNav';
 import { Home, ShoppingBag, Grid, User, ChevronRight, Search, Sparkles, ArrowRight } from 'lucide-react';
@@ -62,8 +62,17 @@ const ServiceCard = ({ title, icon, description, category, onClick }) => (
 
 export default function ServiceList() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [query, setQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const searchParam = params.get('search');
+    if (searchParam) {
+      setQuery(searchParam);
+    }
+  }, [location.search]);
 
   const filteredServices = useMemo(() => {
     return serviceItems.filter((service) => {
