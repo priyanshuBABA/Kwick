@@ -28,9 +28,9 @@ import StationeryGiftCenter from './customer/services/StationeryGiftCenter';
 import KwickBookService from './customer/services/KwickBookService';
 import ServiceList from './customer/pages/ServiceList';
 import KwickPrint from './customer/services/KwickPrint';
-import KwickOffersPage from './customer/pages/KwickOffersPage';
+import KwickOffersPage from './customer/pages/OffersPageComplete';
 import KwickWishlistPage from './customer/pages/KwickWishlistPage';
-import KwickWalletPage from './customer/pages/KwickWalletPage';
+import KwickWalletPage from './customer/pages/WalletPageComplete';
 import ProfileOptionPage from './customer/pages/ProfileOptionPage';
 import KwickNotificationsPage from './customer/pages/KwickNotificationsPage';
 
