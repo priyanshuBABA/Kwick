@@ -8,7 +8,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 
 // Customer Pages
 import CustomerHome from './customer/pages/CustomerHome';
-import CustomerCart from './customer/pages/CustomerCart';
+import CustomerCart from './customer/pages/CustomerCartEnhanced';
 import CustomerOrders from './customer/pages/CustomerOrders';
 import CustomerProfile from './customer/pages/CustomerProfile';
 import AmbulanceService from './customer/services/AmbulanceService';
