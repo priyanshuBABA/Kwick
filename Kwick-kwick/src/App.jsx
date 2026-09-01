@@ -1,5 +1,6 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
+import MobileFrame from './components/MobileFrame';
 
 // Kwick Main Layouts/Pages
 import AuthPage from './pages/AuthPage';
@@ -82,10 +83,10 @@ const App = () => {
       <Route path="/customer/cart" element={<CustomerCart />} />
       <Route path="/customer/orders" element={<CustomerOrders />} />
       <Route path="/customer/profile" element={<CustomerProfile />} />
-      <Route path="/customer/offers" element={<KwickOffersPage />} />
+      <Route path="/customer/offers" element={<MobileFrame><KwickOffersPage /></MobileFrame>} />
       <Route path="/customer/wishlist" element={<KwickWishlistPage />} />
-      <Route path="/customer/wallet" element={<KwickWalletPage />} />
-      <Route path="/customer/rewards" element={<KwickWalletPage />} />
+      <Route path="/customer/wallet" element={<MobileFrame><KwickWalletPage /></MobileFrame>} />
+      <Route path="/customer/rewards" element={<MobileFrame><KwickWalletPage /></MobileFrame>} />
       <Route path="/customer/profile/addresses" element={<ProfileOptionPage />} />
       <Route path="/customer/profile/subscriptions" element={<ProfileOptionPage />} />
       <Route path="/customer/profile/help" element={<ProfileOptionPage />} />

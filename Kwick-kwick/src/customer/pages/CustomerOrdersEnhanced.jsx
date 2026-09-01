@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import MobileFrame from '../../components/MobileFrame';
-import CustomerTopNav from '../../components/CustomerTopNav';
 import BottomNav from '../../components/BottomNav';
 import { ChevronRight, MapPin, Phone, Copy, CheckCircle2, Truck, Package, Clock, X } from 'lucide-react';
 import { ORDERS } from '../../data/htmlDesignData';
@@ -67,7 +66,6 @@ const CustomerOrdersEnhanced = () => {
 
   return (
     <MobileFrame>
-      <CustomerTopNav />
 
       {/* Toast */}
       {toast && (

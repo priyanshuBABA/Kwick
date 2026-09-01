@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import MobileFrame from '../../components/MobileFrame';
-import CustomerTopNav from '../../components/CustomerTopNav';
 import BottomNav from '../../components/BottomNav';
 import { ChevronRight } from 'lucide-react';
 import { DAILY_CATS, SERVICE_CATS } from '../../data/htmlDesignData';
@@ -49,7 +48,6 @@ const ServiceListEnhanced = () => {
 
   return (
     <MobileFrame>
-      <CustomerTopNav />
 
       {/* Toast */}
       {toast && (

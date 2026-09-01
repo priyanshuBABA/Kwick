@@ -441,9 +441,7 @@ export default function KwickWalletPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 pb-32">
-      <CustomerTopNav />
-
-      <main className="mx-auto max-w-4xl px-4 sm:px-6 py-6 space-y-6">
+      <main className="w-full px-4 sm:px-6 py-6 space-y-6">
         {/* Header */}
         <div>
           <p className="text-xs font-bold uppercase tracking-widest text-orange-600">Payment</p>

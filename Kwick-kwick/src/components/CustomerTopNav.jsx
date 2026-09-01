@@ -85,7 +85,8 @@ const CustomerTopNav = ({ onMenuClick, searchQuery, onSearchQueryChange }) => {
     { label: 'Home', path: '/customer/home' },
     { label: 'Categories', path: '/customer/services' },
     { label: 'Orders', path: '/customer/orders' },
-    { label: 'Offers', path: '/customer/offers' },
+    { label: 'Offer', path: '/customer/offers' },
+    { label: 'Wallet', path: '/customer/wallet' },
   ];
 
   const isActive = (path) => location.pathname === path;
@@ -122,31 +123,31 @@ const CustomerTopNav = ({ onMenuClick, searchQuery, onSearchQueryChange }) => {
   };
 
   return (
-    <header className="w-full bg-white/95 backdrop-blur-md sticky top-0 z-50 border-b border-slate-100 shadow-sm transition-all duration-200">
-      <div className="w-full max-w-[1440px] mx-auto px-4 lg:px-8 py-3">
+    <header className="sticky top-0 z-50 w-full border-b border-orange-100/80 bg-gradient-to-r from-orange-50 via-white to-orange-50/80 shadow-[0_10px_30px_rgba(249,115,22,0.08)] backdrop-blur-xl transition-all duration-200">
+      <div className="mx-auto w-full max-w-[1440px] px-4 py-3 lg:px-8">
         <div className="flex items-center justify-between gap-4">
           {/* Logo & Location */}
           <div className="flex items-center gap-3">
             <button
               onClick={onMenuClick}
-              className="lg:hidden p-2 hover:bg-slate-100 rounded-lg text-slate-700"
+              className="rounded-xl p-2 text-slate-700 transition-colors hover:bg-orange-100 lg:hidden"
               aria-label="Open menu"
             >
-              <Menu className="w-5 h-5" />
+              <Menu className="h-5 w-5" />
             </button>
-            <div 
+            <div
               onClick={() => navigate('/customer/home')}
-              className="flex items-center gap-2 text-2xl font-extrabold text-orange-500 cursor-pointer whitespace-nowrap select-none"
+              className="flex cursor-pointer select-none items-center gap-2 whitespace-nowrap text-2xl font-extrabold text-orange-500"
             >
-              <span className="grid place-items-center w-10 h-10 rounded-2xl bg-orange-500 text-white text-lg shadow-md shadow-orange-500/20">K</span>
-              Kwick
+              <span className="grid h-10 w-10 place-items-center rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 text-lg text-white shadow-lg shadow-orange-500/25">K</span>
+              <span className="tracking-tight">Kwick</span>
             </div>
             <button
               onClick={() => setIsLocationOpen(true)}
-              className="hidden sm:flex items-center gap-2 text-sm text-slate-600 bg-orange-50/70 border border-orange-100 px-3 py-2 rounded-full hover:bg-orange-100 transition-colors"
+              className="hidden items-center gap-2 rounded-full border border-orange-200 bg-white/80 px-3 py-2 text-sm text-slate-700 shadow-sm transition-colors hover:bg-orange-50 sm:flex"
             >
               <span className="text-orange-500">📍</span>
-              <span className="font-semibold truncate max-w-[150px]">{userLocation || 'Sector 21, Noida'}</span>
+              <span className="max-w-[150px] truncate font-semibold">{userLocation || 'Sector 21, Noida'}</span>
               <span className="text-slate-400">▾</span>
             </button>
           </div>
@@ -285,60 +286,60 @@ const CustomerTopNav = ({ onMenuClick, searchQuery, onSearchQueryChange }) => {
           </div>
 
           {/* Right Actions */}
-          <nav className="hidden xl:flex items-center gap-7">
+          <nav className="hidden items-center gap-7 xl:flex">
             {navItems.map((item) => (
               <button
                 key={item.path}
                 onClick={() => navigate(item.path)}
-                className={`text-sm font-semibold transition-colors ${isActive(item.path) ? 'text-orange-500 bg-orange-50 px-4 py-2 rounded-xl font-bold' : 'text-slate-600 hover:text-orange-500'}`}
+                className={`rounded-xl px-4 py-2 text-sm font-semibold transition-all ${isActive(item.path) ? 'bg-orange-500 text-white shadow-md shadow-orange-500/30' : 'text-slate-600 hover:bg-white hover:text-orange-500'}`}
               >
                 {item.label}
               </button>
             ))}
           </nav>
-          
+
           <div className="flex items-center gap-2 lg:gap-3">
-            <button className="p-2 hover:bg-slate-100 rounded-lg hidden md:block text-orange-500" title="Voice Search" aria-label="Voice Search">
-              <Mic className="w-5 h-5" />
+            <button className="hidden rounded-xl p-2 text-orange-500 transition-colors hover:bg-orange-100 md:block" title="Voice Search" aria-label="Voice Search">
+              <Mic className="h-5 w-5" />
             </button>
             <button
               onClick={() => navigate('/customer/notifications')}
-              className={`p-2 rounded-lg relative transition-colors ${isActive('/customer/notifications') ? 'bg-orange-50 text-orange-500' : 'hover:bg-slate-100 text-slate-700'}`}
+              className={`relative rounded-xl p-2 transition-colors ${isActive('/customer/notifications') ? 'bg-orange-50 text-orange-500' : 'text-slate-700 hover:bg-white'}`}
               title="Notifications"
               aria-label="Notifications"
             >
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+              <Bell className="h-5 w-5" />
+              <span className="absolute right-1 top-1 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-white"></span>
             </button>
             <button
               onClick={() => navigate('/customer/cart')}
-              className="p-2 hover:bg-slate-100 rounded-lg relative text-slate-700"
+              className="relative rounded-xl p-2 text-slate-700 transition-colors hover:bg-white"
               title="Cart"
               aria-label="Cart"
             >
-              <ShoppingCart className="w-5 h-5" />
+              <ShoppingCart className="h-5 w-5" />
               {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-sm">
+                <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-orange-500 text-[10px] font-bold text-white shadow-sm">
                   {cartCount > 9 ? '9+' : cartCount}
                 </span>
               )}
             </button>
             <button
               onClick={() => navigate('/customer/wishlist')}
-              className={`p-2 rounded-lg relative transition-colors ${isActive('/customer/wishlist') ? 'bg-orange-50 text-orange-500' : 'hover:bg-slate-100 text-slate-700'}`}
+              className={`relative rounded-xl p-2 transition-colors ${isActive('/customer/wishlist') ? 'bg-orange-50 text-orange-500' : 'text-slate-700 hover:bg-white'}`}
               title="Wishlist"
               aria-label="Wishlist"
             >
-              <Heart className="w-5 h-5" fill={isActive('/customer/wishlist') ? 'currentColor' : 'none'} />
+              <Heart className="h-5 w-5" fill={isActive('/customer/wishlist') ? 'currentColor' : 'none'} />
             </button>
             <button
               onClick={() => navigate('/customer/profile')}
-              className="w-9 h-9 lg:w-10 lg:h-10 rounded-2xl bg-orange-500 text-white font-bold overflow-hidden border-2 border-white shadow-md hover:shadow-lg transition-shadow"
+              className="h-9 w-9 overflow-hidden rounded-2xl border-2 border-white bg-gradient-to-br from-orange-500 to-orange-600 font-bold text-white shadow-md transition-shadow hover:shadow-lg lg:h-10 lg:w-10"
             >
               {user?.photo || user?.avatar || user?.picture ? (
-                <img src={user.photo || user.avatar || user.picture} alt="avatar" className="w-full h-full object-cover" />
+                <img src={user.photo || user.avatar || user.picture} alt="avatar" className="h-full w-full object-cover" />
               ) : (
-                <span className="inline-block w-full h-full leading-8 lg:leading-9 text-center text-sm">
+                <span className="inline-block h-full w-full text-center text-sm leading-8 lg:leading-9">
                   {getInitials(user?.name || user?.email)}
                 </span>
               )}

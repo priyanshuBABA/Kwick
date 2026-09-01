@@ -1,6 +1,5 @@
 import React from 'react';
 import MobileFrame from '../../components/MobileFrame';
-import CustomerTopNav from '../../components/CustomerTopNav';
 import BottomNav from '../../components/BottomNav';
 import { WISHLIST_ITEMS } from '../../data/htmlDesignData';
 import { Heart, ShoppingCart } from 'lucide-react';
@@ -20,7 +19,6 @@ const KwickWishlistPage = () => {
 
   return (
     <MobileFrame>
-      <CustomerTopNav />
       <div className="pb-20">
         {/* Header with Move All Button */}
         <div className="mx-6 my-6 bg-white border border-gray-200 rounded-2xl p-5 flex justify-between items-center">

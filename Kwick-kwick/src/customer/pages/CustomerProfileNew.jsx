@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import MobileFrame from '../../components/MobileFrame';
-import CustomerTopNav from '../../components/CustomerTopNav';
 import BottomNav from '../../components/BottomNav';
 import { SETTINGS } from '../../data/htmlDesignData';
 import { LogOut, ChevronRight, Crown } from 'lucide-react';
@@ -31,7 +30,6 @@ const CustomerProfile = () => {
 
   return (
     <MobileFrame>
-      <CustomerTopNav />
       <div className="pb-20">
         {/* Profile Header */}
         <div className="mx-6 mt-6 mb-8 bg-white border border-gray-200 rounded-2xl p-6 flex gap-4">

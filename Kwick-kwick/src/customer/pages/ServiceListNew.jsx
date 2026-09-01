@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import MobileFrame from '../../components/MobileFrame';
-import CustomerTopNav from '../../components/CustomerTopNav';
 import BottomNav from '../../components/BottomNav';
 import { DAILY_CATS, SERVICE_CATS } from '../../data/htmlDesignData';
 import { useNavigate } from 'react-router-dom';
@@ -12,7 +11,6 @@ const ServiceList = () => {
 
   return (
     <MobileFrame>
-      <CustomerTopNav />
       <div className="pb-20">
         {/* Header */}
         <div className="px-6 pt-8 pb-6">

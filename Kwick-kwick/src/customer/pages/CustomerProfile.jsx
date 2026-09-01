@@ -34,7 +34,7 @@ const CustomerProfile = () => {
     { icon: <MapPin className="w-5 h-5 text-slate-500" />, label: "Saved Addresses", path: '/customer/profile/addresses' },
     { icon: <Wallet className="w-5 h-5 text-slate-500" />, label: "My Wallet", path: '/customer/wallet', badge: `₹${walletBalance}` },
     { icon: <Heart className="w-5 h-5 text-slate-500" />, label: "Wishlist", path: '/customer/wishlist', badge: wishlist.length },
-    { icon: <Percent className="w-5 h-5 text-slate-500" />, label: "Offers", path: '/customer/offers', badge: offers.length },
+    { icon: <Percent className="w-5 h-5 text-slate-500" />, label: "Offer", path: '/customer/offers', badge: offers.length },
     { icon: <RefreshCw className="w-5 h-5 text-slate-500" />, label: "Subscriptions", path: '/customer/profile/subscriptions' },
     { icon: <HelpCircle className="w-5 h-5 text-slate-500" />, label: "Help & Support", path: '/customer/profile/help' },
   ];

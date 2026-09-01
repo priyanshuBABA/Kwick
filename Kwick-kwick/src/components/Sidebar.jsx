@@ -14,7 +14,7 @@ const Sidebar = ({ isOpen, onClose }) => {
     { icon: ShoppingBag, label: 'My Orders', path: '/customer/orders', badge: cartCount > 0 ? cartCount : null },
     { icon: Heart, label: 'Wishlist', path: '/customer/wishlist' },
     { icon: Wallet, label: 'Wallet', path: '/customer/wallet' },
-    { icon: Zap, label: 'Offers', path: '/customer/offers' },
+    { icon: Zap, label: 'Offer', path: '/customer/offers' },
     { icon: User, label: 'Profile', path: '/customer/profile' },
   ];
 

@@ -4,7 +4,6 @@ import {
   Check, ChevronLeft, ChevronRight, Clock, Copy, CreditCard, Gift, Search, Sparkles,
   Tag, Truck, Wallet, PartyPopper, Home, ShoppingBag, Grid, User, Zap, Percent
 } from 'lucide-react';
-import CustomerTopNav from '../../components/CustomerTopNav';
 import BottomNav from '../../components/BottomNav';
 
 // ==================== DATA & BUSINESS LOGIC ====================
@@ -440,9 +439,7 @@ export default function KwickOffersPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 pb-32">
-      <CustomerTopNav />
-
-      <main className="mx-auto max-w-6xl px-4 sm:px-6 py-6 space-y-8">
+      <main className="w-full px-4 sm:px-6 py-6 space-y-8">
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>

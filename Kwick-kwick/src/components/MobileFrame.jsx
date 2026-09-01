@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
+import AppFooter from './AppFooter';
 import CustomerTopNav from './CustomerTopNav';
 
 const MobileFrame = ({ children }) => {
@@ -16,6 +17,7 @@ const MobileFrame = ({ children }) => {
         {isCustomer && <CustomerTopNav />}
         <div style={{ width: '100%', minHeight: '100%', overflowX: 'hidden', overflowY: 'auto', paddingBottom: 96 }}>
           {children}
+          {isCustomer && <AppFooter />}
         </div>
       </div>
     </div>

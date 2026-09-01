@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import MobileFrame from '../../components/MobileFrame';
-import CustomerTopNav from '../../components/CustomerTopNav';
 import BottomNav from '../../components/BottomNav';
 import { Heart, ShoppingCart, Trash2, ArrowRight } from 'lucide-react';
 import { WISHLIST_ITEMS } from '../../data/htmlDesignData';
@@ -40,7 +39,6 @@ const KwickWishlistEnhanced = () => {
 
   return (
     <MobileFrame>
-      <CustomerTopNav />
 
       {/* Toast */}
       {toast && (
