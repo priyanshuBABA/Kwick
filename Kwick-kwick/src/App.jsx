@@ -6,11 +6,11 @@ import AuthPage from './pages/AuthPage';
 import RoleSelection from './pages/RoleSelection';
 import ProtectedRoute from './components/ProtectedRoute';
 
-// Customer Pages
-import CustomerHome from './customer/pages/CustomerHome';
+// Customer Pages - Enhanced Versions
+import CustomerHome from './customer/pages/CustomerHomeEnhanced';
 import CustomerCart from './customer/pages/CustomerCartEnhanced';
-import CustomerOrders from './customer/pages/CustomerOrders';
-import CustomerProfile from './customer/pages/CustomerProfile';
+import CustomerOrders from './customer/pages/CustomerOrdersEnhanced';
+import CustomerProfile from './customer/pages/CustomerProfileNew';
 import AmbulanceService from './customer/services/AmbulanceService';
 import DoctorService from './customer/services/DoctorService';
 import PickDrop from './customer/services/PickDrop';
@@ -26,10 +26,10 @@ import ElectricShop from './customer/services/ElectricShop';
 import PandiJiChai from './customer/services/PandiJiChai';
 import StationeryGiftCenter from './customer/services/StationeryGiftCenter';
 import KwickBookService from './customer/services/KwickBookService';
-import ServiceList from './customer/pages/ServiceList';
+import ServiceList from './customer/pages/ServiceListEnhanced';
 import KwickPrint from './customer/services/KwickPrint';
 import KwickOffersPage from './customer/pages/OffersPageComplete';
-import KwickWishlistPage from './customer/pages/KwickWishlistPage';
+import KwickWishlistPage from './customer/pages/KwickWishlistEnhanced';
 import KwickWalletPage from './customer/pages/WalletPageComplete';
 import ProfileOptionPage from './customer/pages/ProfileOptionPage';
 import KwickNotificationsPage from './customer/pages/KwickNotificationsPage';
