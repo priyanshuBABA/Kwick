@@ -18,14 +18,15 @@ const CustomerProfile = () => {
   });
 
   const handleLogout = () => {
-    if (window.confirm('Are you sure you want to logout?')) {
-      logout();
-      navigate('/');
-    }
+    navigate('/customer/profile/logout');
   };
 
   const handleSettingClick = (setting) => {
-    alert(`Opening ${setting.t}...`);
+    if (setting.path) {
+      navigate(setting.path);
+      return;
+    }
+    if (setting.id === 'st6') navigate('/customer/profile/support');
   };
 
   return (
@@ -49,6 +50,28 @@ const CustomerProfile = () => {
             </div>
             <div className="text-xs text-gray-600">
               {userInfo.phone} · {userInfo.email}
+            </div>
+          </div>
+        </div>
+
+        {/* Kwick Pro quick access */}
+        <div className="px-6 mb-4">
+          <div
+            onClick={() => navigate('/customer/profile/kwick-pro')}
+            className="cursor-pointer overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-slate-800 to-[#FF6B00] p-5 text-white shadow-lg"
+          >
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.24em] text-yellow-300">Kwick Pro</p>
+                <h3 className="mt-2 text-xl font-black">3 Months Plan</h3>
+              </div>
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10">
+                <Crown className="h-6 w-6 text-yellow-300" />
+              </div>
+            </div>
+            <div className="mt-4 flex items-center justify-between gap-3 rounded-2xl bg-white/10 px-3 py-2">
+              <span className="text-sm font-medium text-slate-200">Renews on 12 Oct 2026</span>
+              <span className="rounded-full bg-yellow-300 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-slate-900">Manage</span>
             </div>
           </div>
         </div>

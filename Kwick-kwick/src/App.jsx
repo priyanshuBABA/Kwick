@@ -68,6 +68,7 @@ const App = () => {
       {/* First screen: choose a role before entering the app. */}
       <Route path="/" element={<RoleSelection />} />
       <Route path="/auth" element={<AuthPage />} />
+      <Route path="/login" element={<AuthPage />} />
       <Route path="/role-selection" element={<RoleSelection />} />
 
       {/* Protected role-based routes */}
@@ -88,9 +89,15 @@ const App = () => {
       <Route path="/customer/wallet" element={<MobileFrame><KwickWalletPage /></MobileFrame>} />
       <Route path="/customer/rewards" element={<MobileFrame><KwickWalletPage /></MobileFrame>} />
       <Route path="/customer/profile/addresses" element={<ProfileOptionPage />} />
+      <Route path="/customer/profile/payments" element={<ProfileOptionPage />} />
+      <Route path="/customer/profile/kwick-pro" element={<ProfileOptionPage />} />
+      <Route path="/customer/profile/preferences" element={<ProfileOptionPage />} />
+      <Route path="/customer/profile/security" element={<ProfileOptionPage />} />
+      <Route path="/customer/profile/support" element={<ProfileOptionPage />} />
+      <Route path="/customer/profile/logout" element={<ProfileOptionPage />} />
       <Route path="/customer/profile/subscriptions" element={<ProfileOptionPage />} />
       <Route path="/customer/profile/help" element={<ProfileOptionPage />} />
-      <Route path="/customer/notifications" element={<KwickNotificationsPage />} />
+      <Route path="/customer/notifications" element={<MobileFrame><KwickNotificationsPage /></MobileFrame>} />
       <Route path="/customer/pick-drop" element={<PickDrop />} />
       <Route path="/customer/fresh-mandi" element={<FreshMandi />} />
       <Route path="/customer/doctor" element={<DoctorService />} />

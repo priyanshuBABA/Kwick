@@ -102,12 +102,12 @@ export const COUPONS = [
 ];
 
 export const SETTINGS = [
-  { id: 'st1', ic: '📍', t: 'Saved Addresses', s: 'Home, Work +1 more' },
-  { id: 'st2', ic: '💳', t: 'Payment Methods', s: '2 UPI IDs, 1 Card saved' },
-  { id: 'st3', ic: '👑', t: 'Kwick Pro Subscription', s: 'Renew or upgrade your plan' },
-  { id: 'st4', ic: '🌐', t: 'Language & Preferences', s: 'English • Voice search on' },
-  { id: 'st5', ic: '🔒', t: 'Security & Privacy', s: 'Password, account deletion' },
-  { id: 'st6', ic: '📞', t: 'Help & Support', s: '24x7 chatbot & call support' },
+  { id: 'st1', ic: '📍', t: 'Saved Addresses', s: 'Home, Work +1 more', path: '/customer/profile/addresses' },
+  { id: 'st2', ic: '💳', t: 'Payment Methods', s: '2 UPI IDs, 1 Card saved', path: '/customer/profile/payments' },
+  { id: 'st3', ic: '👑', t: 'Kwick Pro Subscription', s: 'Renew or upgrade your plan', path: '/customer/profile/kwick-pro' },
+  { id: 'st4', ic: '🌐', t: 'Language & Preferences', s: 'English • Voice search on', path: '/customer/profile/preferences' },
+  { id: 'st5', ic: '🔒', t: 'Security & Privacy', s: 'Password, account deletion', path: '/customer/profile/security' },
+  { id: 'st6', ic: '📞', t: 'Help & Support', s: '24x7 chatbot & call support', path: '/customer/profile/support' },
 ];
 
 export const NOTIFICATIONS = [
