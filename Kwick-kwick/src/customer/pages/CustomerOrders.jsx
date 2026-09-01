@@ -76,7 +76,7 @@ const CustomerOrders = () => {
         ) : (
           <div className="space-y-3">
             {filteredOrders.map((order, idx) => (
-              <div key={idx} onClick={() => navigate('/customer/order-tracking')} className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 cursor-pointer hover:shadow-md hover:border-slate-200 transition-all group active:scale-[0.99]">
+              <div key={idx} onClick={() => navigate('/customer/order-tracking')} className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 cursor-pointer hover:shadow-md hover:border-slate-200 transition-all group active:scale-[0.99] relative overflow-hidden">
                  {/* decorative accent */}
                  <div className={`absolute top-0 right-0 w-2 h-full ${
                    order.status === 'Delivered' ? 'bg-green-500/20' :
@@ -111,11 +111,6 @@ const CustomerOrders = () => {
         )}
       </div>
       <BottomNav />
-    </MobileFrame>
-  );
-};
-      </div>
-      <BottomNav items={navItems} highlightColor="#FFC107" />
     </MobileFrame>
   );
 };
