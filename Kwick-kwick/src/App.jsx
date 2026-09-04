@@ -34,6 +34,7 @@ import KwickWishlistPage from './customer/pages/KwickWishlistEnhanced';
 import KwickWalletPage from './customer/pages/WalletPageComplete';
 import ProfileOptionPage from './customer/pages/ProfileOptionPage';
 import KwickNotificationsPage from './customer/pages/KwickNotificationsPage';
+import PaymentPage from './customer/pages/PaymentPage';
 
 // Rider and Vendor pages have been removed — landing page will show role options only
 
@@ -82,6 +83,7 @@ const App = () => {
       {/* Customer Portal */}
       <Route path="/customer/home" element={<CustomerHome />} />
       <Route path="/customer/cart" element={<CustomerCart />} />
+      <Route path="/customer/payment" element={<PaymentPage />} />
       <Route path="/customer/orders" element={<CustomerOrders />} />
       <Route path="/customer/profile" element={<CustomerProfile />} />
       <Route path="/customer/offers" element={<MobileFrame><KwickOffersPage /></MobileFrame>} />

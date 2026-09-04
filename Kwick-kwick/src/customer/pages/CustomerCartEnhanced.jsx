@@ -3,31 +3,21 @@ import MobileFrame from '../../components/MobileFrame';
 import TopBar from '../../components/TopBar';
 import BottomNav from '../../components/BottomNav';
 import { useCart } from '../../CartContext';
-import { Trash2, ShoppingBag, ArrowRight } from 'lucide-react';
+import { Trash2, ShoppingBag, ArrowRight, Minus, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useAppContext } from '../../AppContext';
 
 /**
  * Enhanced Cart Page based on HTML Design
  * Displays shopping cart with billing summary and checkout
  */
 const CustomerCartEnhanced = () => {
-  const { cart, removeFromCart, clearCart, cartTotal } = useCart();
-  const { placeOrder } = useAppContext();
+  const { cart, removeFromCart, updateQuantity, clearCart, cartTotal } = useCart();
   const navigate = useNavigate();
 
   const handleCheckout = () => {
     if (cart.length === 0) return;
     
-    placeOrder({
-      items: cart,
-      total: cartTotal,
-      storeName: cart[0]?.store || 'Kwick Store',
-      service: cart[0]?.service || 'General'
-    });
-
-    clearCart();
-    navigate('/customer/orders');
+    navigate('/customer/payment');
   };
 
   // HTML Design styled empty state
@@ -80,13 +70,12 @@ const CustomerCartEnhanced = () => {
                     <p className="text-orange-600 font-black text-base">₹{item.price}</p>
                   </div>
                 </div>
-                <button 
-                  onClick={() => removeFromCart(item.id)}
-                  className="w-10 h-10 bg-red-50 rounded-lg flex items-center justify-center text-red-600 hover:bg-red-100 transition-colors flex-shrink-0"
-                  title="Remove from cart"
-                >
-                  <Trash2 className="w-5 h-5" />
-                </button>
+                <div className="flex items-center gap-2">
+                  <button onClick={() => updateQuantity(item.id, item.quantity - 1)} aria-label={`Decrease ${item.name}`} className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200"><Minus className="h-4 w-4" /></button>
+                  <span className="w-5 text-center text-sm font-black">{item.quantity}</span>
+                  <button onClick={() => updateQuantity(item.id, item.quantity + 1)} aria-label={`Increase ${item.name}`} className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-100 text-orange-700 hover:bg-orange-200"><Plus className="h-4 w-4" /></button>
+                  <button onClick={() => removeFromCart(item.id)} aria-label={`Remove ${item.name}`} className="flex h-10 w-10 items-center justify-center rounded-lg bg-red-50 text-red-600 hover:bg-red-100"><Trash2 className="h-5 w-5" /></button>
+                </div>
               </div>
             ))}
           </div>

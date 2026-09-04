@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import MobileFrame from '../../components/MobileFrame';
 import TopBar from '../../components/TopBar';
 import ProductCard from '../../components/ProductCard';
@@ -7,11 +7,21 @@ import { useCart } from '../../CartContext';
 import { MessageCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const FreshMandi = () => {
-  const { addToCart } = useCart();
+  const { cart, addToCart, updateQuantity } = useCart();
+  const [addedMessage, setAddedMessage] = useState('');
+
+  const handleAdd = (product) => {
+    addToCart({ ...product, service: 'Fresh Mandi' });
+    setAddedMessage(`${product.name} added to cart`);
+    window.setTimeout(() => setAddedMessage(''), 1800);
+  };
+
+  const getQuantity = (productId) => cart.find(item => item.id === productId)?.quantity || 0;
 
   return (
     <MobileFrame>
       <TopBar title="Fresh Mandi" bgColor="bg-white" />
+      {addedMessage && <div className="fixed left-1/2 top-20 z-50 -translate-x-1/2 rounded-xl bg-slate-900 px-4 py-3 text-sm font-bold text-white shadow-xl">✓ {addedMessage}</div>}
       
       {/* Top Banner */}
       <div className="bg-green-50 py-3 flex items-center justify-between px-4 border-b border-green-100 sticky top-[64px] z-30">
@@ -33,13 +43,13 @@ const FreshMandi = () => {
       <div className="grid grid-cols-2 gap-4 p-4 pb-24">
         {products.freshMandi.map((product) => (
           <div key={product.id} className="w-full">
-            <ProductCard product={{ ...product, service: 'Fresh Mandi' }} onAdd={addToCart} />
+            <ProductCard product={{ ...product, service: 'Fresh Mandi' }} onAdd={handleAdd} onRemove={(id) => updateQuantity(id, getQuantity(id) - 1)} quantity={getQuantity(product.id)} />
           </div>
         ))}
         {/* DUPLICATE FOR ILLUSION OF MORE ITEMS */}
         {products.freshMandi.map((product) => (
           <div key={`dup-${product.id}`} className="w-full">
-            <ProductCard product={{...product, id: product.id + 100, service: 'Fresh Mandi' }} onAdd={addToCart} />
+            <ProductCard product={{...product, id: product.id + 100, service: 'Fresh Mandi' }} onAdd={handleAdd} onRemove={(id) => updateQuantity(id, getQuantity(id) - 1)} quantity={getQuantity(product.id + 100)} />
           </div>
         ))}
       </div>

@@ -5,6 +5,28 @@ import { ChevronRight } from 'lucide-react';
 import { DAILY_CATS, SERVICE_CATS } from '../../data/htmlDesignData';
 import { useNavigate } from 'react-router-dom';
 
+const CATEGORY_ROUTES = {
+  Grocery: '/customer/fresh-mandi',
+  Medicines: '/customer/medicines',
+  'Fresh Mandi': '/customer/fresh-mandi',
+  Fruits: '/customer/fresh-mandi',
+  Vegetables: '/customer/fresh-mandi',
+  Cakes: '/customer/mishra-ji-cakes',
+  Bakery: '/customer/mishra-ji-cakes',
+  Stationery: '/customer/stationery-gift',
+  Laundry: '/customer/laundry',
+  Electric: '/customer/electric-shop',
+  Flowers: '/customer/stationery-gift',
+  'Pet Shop': '/customer/household-items',
+  'Home Services': '/customer/home-services',
+  Doctor: '/customer/doctor',
+  Ambulance: '/customer/ambulance',
+  Taxi: '/ride-booking/home',
+  'Bike Ride': '/ride-booking/home',
+  'Pick & Drop': '/customer/pick-drop',
+  'Kwick Print': '/customer/kwick-print',
+};
+
 const ServiceListEnhanced = () => {
   const [activeTab, setActiveTab] = useState('daily');
   const [toast, setToast] = useState(null);
@@ -19,7 +41,7 @@ const ServiceListEnhanced = () => {
 
   const handleCategoryClick = (category) => {
     showToast(`📂 Opening ${category.n}...`);
-    navigate('/customer/home');
+    navigate(CATEGORY_ROUTES[category.n] || '/customer/services');
   };
 
   const curatedDeals = [

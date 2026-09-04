@@ -20,16 +20,22 @@ export const CartProvider = ({ children }) => {
   };
 
   const removeFromCart = (productId) => {
-     setCart((prevCart) => prevCart.filter(item => item.id !== productId));
+    setCart((prevCart) => prevCart.filter(item => item.id !== productId));
+  };
+
+  const updateQuantity = (productId, quantity) => {
+    setCart((prevCart) => prevCart
+      .map(item => item.id === productId ? { ...item, quantity } : item)
+      .filter(item => item.quantity > 0));
   };
   
   const clearCart = () => setCart([]);
 
   const cartCount = cart.reduce((total, item) => total + item.quantity, 0);
-  const cartTotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+  const cartTotal = cart.reduce((total, item) => total + (Number(item.price) * item.quantity), 0);
 
   return (
-    <CartContext.Provider value={{ cart, addToCart, removeFromCart, clearCart, cartCount, cartTotal }}>
+    <CartContext.Provider value={{ cart, addToCart, removeFromCart, updateQuantity, clearCart, cartCount, cartTotal }}>
       {children}
     </CartContext.Provider>
   );
