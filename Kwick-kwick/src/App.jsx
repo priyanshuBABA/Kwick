@@ -3,7 +3,6 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import MobileFrame from './components/MobileFrame';
 
 // Kwick Main Layouts/Pages
-import AuthPage from './pages/AuthPage';
 import RoleSelection from './pages/RoleSelection';
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -68,8 +67,6 @@ const App = () => {
     <Routes>
       {/* First screen: choose a role before entering the app. */}
       <Route path="/" element={<RoleSelection />} />
-      <Route path="/auth" element={<AuthPage />} />
-      <Route path="/login" element={<AuthPage />} />
       <Route path="/role-selection" element={<RoleSelection />} />
 
       {/* Protected role-based routes */}

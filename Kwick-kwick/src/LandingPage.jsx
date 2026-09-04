@@ -35,7 +35,7 @@ const LandingPage = () => {
   };
 
   const goToAuth = () => {
-    navigate('/auth');
+    navigate('/role-selection');
   };
 
   return (
@@ -80,7 +80,7 @@ const LandingPage = () => {
         </div>
 
         <button onClick={goToAuth} className="mb-6 inline-flex items-center justify-center gap-2 rounded-full border border-slate-200 bg-white/80 px-5 py-3 text-sm font-semibold text-slate-700 shadow-sm backdrop-blur">
-          Sign in or create an account
+          Choose your role
           <ArrowRight className="w-4 h-4" />
         </button>
 

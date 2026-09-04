@@ -170,7 +170,7 @@ export default function ProfileOptionPage() {
 
   const handleLogout = () => {
     localStorage.clear();
-    navigate('/login');
+    navigate('/role-selection', { replace: true });
   };
 
   if (key === 'logout') {
