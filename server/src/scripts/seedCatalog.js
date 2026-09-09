@@ -1,0 +1,193 @@
+import 'dotenv/config'
+import { closeDB, connectDB } from '../config/db.js'
+import { ensureProductIndexes, upsertProducts } from '../models/productModel.js'
+import { ensureServiceIndexes, upsertServices } from '../models/serviceModel.js'
+
+const products = [
+  {
+    catalogKey: 'product-fresh-tomatoes',
+    legacyId: 'FM1',
+    name: 'Fresh Tomatoes',
+    description: 'Fresh locally sourced tomatoes.',
+    price: 40,
+    image: 'https://loremflickr.com/400/400/tomatoes,fresh',
+    emoji: '🍅',
+    category: 'Fresh Mandi',
+    subcategory: 'Vegetables',
+    unit: '1 kg',
+    stock: 40,
+    available: true,
+    rating: 4.6,
+    reviewCount: 18,
+    tags: ['fresh', 'vegetables', 'mandi'],
+    vendor: { name: 'Jhagriya Fresh Mart', city: 'Munger' },
+  },
+  {
+    catalogKey: 'product-maggi-bundle',
+    legacyId: 'p1',
+    name: 'Maggi Noodles Bundle',
+    description: 'A convenient instant noodles bundle for quick meals.',
+    price: 120,
+    image: 'https://loremflickr.com/400/400/noodles,fresh',
+    emoji: '🍜',
+    category: 'Grocery',
+    subcategory: 'Instant Food',
+    brand: 'Maggi',
+    unit: '4 pack',
+    stock: 50,
+    available: true,
+    rating: 4.5,
+    reviewCount: 32,
+    tags: ['snacks', 'instant food', 'bundle'],
+    vendor: { name: 'Kwick Store', city: 'Munger' },
+  },
+  {
+    catalogKey: 'product-paracetamol-500',
+    legacyId: 'MED1',
+    name: 'Paracetamol 500mg',
+    description: 'Paracetamol tablets for general pain and fever relief.',
+    price: 15,
+    image: 'https://loremflickr.com/400/400/pills,fresh',
+    emoji: '💊',
+    category: 'Medicines',
+    subcategory: 'Painkiller',
+    brand: 'Kwick Pharmacy',
+    unit: '10 tablets',
+    stock: 100,
+    available: true,
+    rating: 4.7,
+    reviewCount: 25,
+    tags: ['medicine', 'painkiller', 'health'],
+    vendor: { name: 'Apna Medical Store', city: 'Munger' },
+  },
+  {
+    catalogKey: 'product-dishwash-gel',
+    legacyId: 'HH1',
+    name: 'Dishwash Gel',
+    description: 'Liquid dishwashing gel for everyday kitchen cleaning.',
+    price: 95,
+    image: 'https://loremflickr.com/400/400/soap,fresh',
+    emoji: '🧼',
+    category: 'Household',
+    subcategory: 'Cleaners',
+    unit: '500 ml',
+    stock: 0,
+    available: false,
+    rating: 4.2,
+    reviewCount: 9,
+    tags: ['cleaning', 'kitchen', 'household'],
+    vendor: { name: 'Daily Needs Store', city: 'Munger' },
+  },
+  {
+    catalogKey: 'product-ball-pen',
+    legacyId: 's1',
+    name: 'Ball Pen',
+    description: 'Smooth-writing everyday ball pen.',
+    price: 10,
+    image: 'https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?w=300&h=200&fit=crop',
+    emoji: '🖊️',
+    category: 'Stationery',
+    subcategory: 'Writing',
+    brand: 'Kwick Stationery',
+    unit: '1 piece',
+    stock: 200,
+    available: true,
+    rating: 4.4,
+    reviewCount: 12,
+    tags: ['pen', 'writing', 'school'],
+    vendor: { name: 'Stationery Gift Center', city: 'Munger' },
+  },
+]
+
+const services = [
+  {
+    catalogKey: 'service-ac-servicing',
+    legacyId: 'SERV1',
+    name: 'AC Servicing',
+    description: 'Professional AC servicing and cleaning at your home.',
+    category: 'Home Services',
+    subcategory: 'Appliance Repair',
+    image: 'https://loremflickr.com/400/400/ac,fresh',
+    emoji: '❄️',
+    startingPrice: 599,
+    priceUnit: 'per visit',
+    provider: { name: 'Home Services Munger', city: 'Munger' },
+    available: true,
+    rating: 4.6,
+    reviewCount: 21,
+    tags: ['ac', 'repair', 'home'],
+    metadata: { estimatedDuration: '90 minutes', bookingType: 'scheduled' },
+  },
+  {
+    catalogKey: 'service-doctor-consultation',
+    legacyId: 'doctor-general-consultation',
+    name: 'General Physician Consultation',
+    description: 'Book an appointment with a verified general physician.',
+    category: 'Doctor',
+    subcategory: 'Consultation',
+    image: null,
+    emoji: '🩺',
+    startingPrice: 300,
+    priceUnit: 'per consultation',
+    provider: { name: 'Dr. R. K. Sinha Clinic', city: 'Munger' },
+    available: true,
+    rating: 4.8,
+    reviewCount: 34,
+    tags: ['doctor', 'health', 'consultation'],
+    metadata: { bookingType: 'appointment', consultationModes: ['clinic', 'video'] },
+  },
+  {
+    catalogKey: 'service-laundry-shirt',
+    legacyId: 'laundry-shirt',
+    name: 'Shirt Laundry',
+    description: 'Wash and press service for one shirt.',
+    category: 'Laundry',
+    subcategory: 'Wash and Iron',
+    image: null,
+    emoji: '👔',
+    price: 30,
+    priceUnit: 'per piece',
+    provider: { name: 'Sparkle Laundry Co.', city: 'Munger' },
+    available: true,
+    rating: 4.7,
+    reviewCount: 16,
+    tags: ['laundry', 'shirt', 'wash'],
+    metadata: { eta: 'Same day', pickupAvailable: true },
+  },
+  {
+    catalogKey: 'service-pick-drop',
+    legacyId: 'pick-drop-local',
+    name: 'Local Parcel Pick & Drop',
+    description: 'Local parcel pickup and delivery service.',
+    category: 'Pick & Drop',
+    subcategory: 'Courier',
+    image: null,
+    emoji: '📦',
+    startingPrice: 50,
+    priceUnit: 'up to 5 km',
+    provider: { name: 'Kwick Logistics', city: 'Munger' },
+    available: false,
+    rating: 4.3,
+    reviewCount: 11,
+    tags: ['courier', 'parcel', 'delivery'],
+    metadata: { bookingType: 'on-demand', maxDistanceKm: 5 },
+  },
+]
+
+async function seedCatalog() {
+  await connectDB()
+  await ensureProductIndexes()
+  await ensureServiceIndexes()
+  await upsertProducts(products)
+  await upsertServices(services)
+  console.log(`Catalog seed complete: ${products.length} products and ${services.length} services processed`)
+}
+
+try {
+  await seedCatalog()
+} catch (error) {
+  console.error('Catalog seed failed:', error.message)
+  process.exitCode = 1
+} finally {
+  await closeDB()
+}

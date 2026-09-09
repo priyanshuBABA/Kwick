@@ -1,0 +1,23 @@
+{
+  "name": "kwick-server",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch src/index.js",
+    "start": "node src/index.js",
+    "server": "node src/index.js",
+    "seed:catalog": "node src/scripts/seedCatalog.js",
+    "seed:vendor-ownership": "node src/scripts/seedVendorOwnership.js",
+    "seed:e2e-vendor-flow": "node src/scripts/seedE2EVendorFlow.js",
+    "seed:e2e-rider-flow": "node src/scripts/seedE2ERiderFlow.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "mongodb": "^7.6.0"
+  }
+}

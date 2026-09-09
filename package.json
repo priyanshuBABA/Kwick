@@ -1,0 +1,13 @@
+{
+  "name": "kwick-monorepo-root",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "install:app": "npm --prefix ./Kwick-kwick install",
+    "build": "npm --prefix ./Kwick-kwick install && npm --prefix ./Kwick-kwick run build",
+    "dev": "npm --prefix ./Kwick-kwick run dev -- --host 0.0.0.0",
+    "preview": "npm --prefix ./Kwick-kwick run preview -- --host 0.0.0.0",
+    "server": "npm --prefix ./server start",
+    "server:dev": "npm --prefix ./server run dev"
+  }
+}
