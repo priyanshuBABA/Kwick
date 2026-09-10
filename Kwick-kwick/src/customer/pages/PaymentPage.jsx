@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, CheckCircle2, CreditCard, LockKeyhole, Smartphone, WalletCards } from 'lucide-react';
 import MobileFrame from '../../components/MobileFrame';
 import BottomNav from '../../components/BottomNav';
 import { useCart } from '../../CartContext';
 import { useAuth } from '../../context/AuthContext';
-import { createOrder } from '../../services/orderApi';
+import { createOrder, estimateOrder } from '../../services/orderApi';
 import { useLocationContext } from '../../context/LocationContext';
+import MapLocationPicker from '../../components/MapLocationPicker';
 
 const PAYMENT_METHODS = [
   { id: 'upi', label: 'UPI', detail: 'Google Pay, PhonePe, Paytm', icon: Smartphone },
@@ -19,23 +20,36 @@ export default function PaymentPage() {
   const navigate = useNavigate();
   const { cart, cartTotal, clearCart } = useCart();
   const { token } = useAuth();
-  const { currentLocation, formattedAddress } = useLocationContext();
+  const { currentLocation, formattedAddress, saveLocation } = useLocationContext();
   const [method, setMethod] = useState('upi');
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState('');
+  const [quote, setQuote] = useState(null);
+  const [quoteLoading, setQuoteLoading] = useState(false);
+
+  const shippingAddress = currentLocation ? { ...currentLocation, formattedAddress: currentLocation.formattedAddress || formattedAddress } : null;
+
+  useEffect(() => {
+    let active = true;
+    if (!currentLocation || !token || !cart.length) {
+      setQuote(null);
+      return undefined;
+    }
+    setQuoteLoading(true);
+    const nextShippingAddress = currentLocation ? { ...currentLocation, formattedAddress: currentLocation.formattedAddress || formattedAddress } : null;
+    if (!nextShippingAddress) return undefined;
+    estimateOrder({ shippingAddress: nextShippingAddress }, token)
+      .then((nextQuote) => { if (active) setQuote(nextQuote); })
+      .catch((requestError) => { if (active) { setQuote(null); setError(requestError.message || 'Unable to calculate delivery route.'); } })
+      .finally(() => { if (active) setQuoteLoading(false); });
+    return () => { active = false; };
+  }, [cart.length, currentLocation, formattedAddress, token]);
 
   const handlePayment = async () => {
     if (!cart.length || isProcessing) return;
     setIsProcessing(true);
     setError('');
     try {
-      const shippingAddress = currentLocation
-        ? {
-          formattedAddress,
-          latitude: currentLocation.latitude,
-          longitude: currentLocation.longitude,
-        }
-        : undefined;
       const order = await createOrder({ paymentMethod: method, shippingAddress }, token);
       await clearCart();
       navigate('/customer/orders', { state: { orderId: order._id } });
@@ -68,16 +82,18 @@ export default function PaymentPage() {
         </header>
 
         <main className="space-y-5 p-5">
+          <MapLocationPicker value={currentLocation} onChange={saveLocation} title="Delivery address" required />
+
           <section className="rounded-2xl border border-slate-200 bg-white p-4">
             <div className="mb-3 flex items-center justify-between"><h2 className="font-black text-slate-900">Order summary</h2><span className="text-sm font-bold text-slate-500">{cart.reduce((sum, item) => sum + item.quantity, 0)} items</span></div>
             <div className="space-y-2">{cart.map(item => <div key={item.id} className="flex justify-between text-sm"><span className="text-slate-600">{item.name} x {item.quantity}</span><span className="font-bold">₹{Number(item.price) * item.quantity}</span></div>)}</div>
-            <div className="mt-4 flex justify-between border-t border-slate-100 pt-3 font-black"><span>Total</span><span className="text-orange-600">₹{cartTotal}</span></div>
+            <div className="mt-4 space-y-2 border-t border-slate-100 pt-3 text-sm"><div className="flex justify-between"><span>Items</span><span>₹{quote?.subtotal ?? cartTotal}</span></div><div className="flex justify-between"><span>Delivery fee</span><span>{quoteLoading ? 'Calculating...' : quote ? `₹${quote.deliveryFee}` : 'Unavailable'}</span></div>{quote?.deliveryRoute && <div className="flex justify-between"><span>Road distance</span><span>{quote.deliveryRoute.distanceKm} km · {quote.deliveryRoute.durationMinutes} min</span></div>}<div className="flex justify-between border-t border-slate-100 pt-3 font-black"><span>Total</span><span className="text-orange-600">₹{quote?.total ?? cartTotal}</span></div></div>
           </section>
 
           <section><h2 className="mb-3 font-black text-slate-900">Payment method</h2><div className="space-y-3">{PAYMENT_METHODS.map(({ id, label, detail, icon }) => <button key={id} onClick={() => setMethod(id)} className={`flex w-full items-center gap-3 rounded-2xl border p-4 text-left transition ${method === id ? 'border-orange-500 bg-orange-50 ring-2 ring-orange-100' : 'border-slate-200 bg-white'}`}>{React.createElement(icon, { className: `h-5 w-5 ${method === id ? 'text-orange-600' : 'text-slate-500'}` })}<span className="flex-1"><span className="block font-bold text-slate-900">{label}</span><span className="text-xs text-slate-500">{detail}</span></span><span className={`h-5 w-5 rounded-full border-2 ${method === id ? 'border-orange-500 bg-orange-500 shadow-[inset_0_0_0_3px_white]' : 'border-slate-300'}`} /></button>)}</div></section>
 
           {error && <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">{error}</p>}
-          <button onClick={handlePayment} disabled={isProcessing} className="flex w-full items-center justify-center gap-2 rounded-xl bg-orange-600 py-4 font-black text-white shadow-lg shadow-orange-200 transition hover:bg-orange-700 disabled:cursor-wait disabled:opacity-70">{isProcessing ? 'Creating order...' : `Place order · ₹${cartTotal}`} <LockKeyhole className="h-4 w-4" /></button>
+          <button onClick={handlePayment} disabled={isProcessing || !quote || quoteLoading} className="flex w-full items-center justify-center gap-2 rounded-xl bg-orange-600 py-4 font-black text-white shadow-lg shadow-orange-200 transition hover:bg-orange-700 disabled:cursor-wait disabled:opacity-70">{isProcessing ? 'Creating order...' : `Place order · ₹${quote?.total ?? cartTotal}`} <LockKeyhole className="h-4 w-4" /></button>
           <p className="text-center text-xs text-slate-500">Your payment details are protected by secure checkout.</p>
         </main>
       </div>

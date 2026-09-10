@@ -1,5 +1,6 @@
 import { ObjectId } from 'mongodb'
 import { getDB } from '../config/db.js'
+import { findUserById } from './userModel.js'
 
 export const ORDER_COLLECTION = 'orders'
 
@@ -227,7 +228,6 @@ export async function updateVendorOrderStatus(id, vendorId, expectedStatus, stat
       {
         $set: {
           vendorStatus: status,
-          status: { $cond: [{ $eq: ['$status', 'rider_assigned'] }, '$status', status] },
           updatedAt: new Date(),
         },
       },
@@ -244,4 +244,12 @@ export async function ensureOrderIndexes() {
   await collection.createIndex({ 'items.vendorId': 1, createdAt: -1 })
   await collection.createIndex({ assignedRiderId: 1, createdAt: -1 })
   await collection.createIndex({ status: 1, assignedRiderId: 1, createdAt: -1 })
+}
+
+export async function serializeCustomerOrder(order) {
+  const serialized = serializeOrder(order)
+  if (!order?.assignedRiderId) return serialized
+  const rider = await findUserById(order.assignedRiderId)
+  if (rider?.riderLocation) serialized.riderLocation = rider.riderLocation
+  return serialized
 }

@@ -34,6 +34,7 @@ function normalizeAddress(data) {
     state: address.state || address.state_district || '',
     postalCode: address.postcode || '',
     country: address.country || '',
+    placeId: data?.place_id ? String(data.place_id) : null,
   }
 }
 
@@ -44,14 +45,17 @@ export async function reverseGeocode(latitude, longitude) {
 }
 
 export async function geocodeAddress(query) {
+  const matches = await searchAddresses(query)
+  const result = matches[0]
+  if (!result) throw new Error('No location was found for that address.')
+  return result
+}
+
+export async function searchAddresses(query) {
   const trimmedQuery = String(query || '').trim()
   if (!trimmedQuery) throw new Error('Enter an address to search.')
-  const data = await requestNominatim(`/search?format=jsonv2&q=${encodeURIComponent(trimmedQuery)}&addressdetails=1&limit=1`)
-  const result = Array.isArray(data) ? data[0] : null
-  if (!result?.lat || !result?.lon) throw new Error('No location was found for that address.')
-  return {
-    latitude: Number(result.lat),
-    longitude: Number(result.lon),
-    ...normalizeAddress(result),
-  }
+  const data = await requestNominatim(`/search?format=jsonv2&q=${encodeURIComponent(trimmedQuery)}&addressdetails=1&limit=5`)
+  return (Array.isArray(data) ? data : [])
+    .filter((result) => result?.lat && result?.lon)
+    .map((result) => ({ latitude: Number(result.lat), longitude: Number(result.lon), ...normalizeAddress(result) }))
 }

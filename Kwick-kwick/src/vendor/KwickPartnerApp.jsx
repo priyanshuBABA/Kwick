@@ -452,7 +452,7 @@ function Portal({ category, onBack, onLogin }) {
 
 export default function KwickPartnerApp() {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const [category, setCategory] = useState(null);
   const [showPortal, setShowPortal] = useState(false);
   const [loggedIn, setLoggedIn] = useState(() => !!localStorage.getItem("kwick_loggedIn"));
@@ -508,6 +508,8 @@ export default function KwickPartnerApp() {
     localStorage.removeItem("kwick_loggedCategory");
     navigate('/role-selection', { replace: true });
   }
+
+  if (user?.roles?.includes("vendor")) return <KwickVendorDashboard onLogout={handleLogout} />;
 
   if (loggedIn) {
     const selected = loggedCategory?.name || "";

@@ -35,6 +35,10 @@ function productToCartItem(product, quantity, existingItem = null) {
   }
 }
 
+function hasStock(product, quantity) {
+  return !Number.isInteger(product.stock) || quantity <= product.stock
+}
+
 async function getCartResponse(userId) {
   return serializeCart(await findCartByUserId(userId))
 }
@@ -74,9 +78,11 @@ router.post('/items', async (req, res) => {
     const userId = getUserId(req)
     const cart = await createCartForUser(userId)
     const existingItem = cart.items.find((item) => item.productId.toString() === product._id.toString())
+    const nextQuantity = (existingItem?.quantity || 0) + parsedQuantity
+    if (!hasStock(product, nextQuantity)) return res.status(400).json({ success: false, message: `Only ${product.stock} item${product.stock === 1 ? '' : 's'} available` })
     const items = existingItem
       ? cart.items.map((item) => item.productId.toString() === product._id.toString()
-        ? productToCartItem(product, item.quantity + parsedQuantity, item)
+        ? productToCartItem(product, nextQuantity, item)
         : item)
       : [...cart.items, productToCartItem(product, parsedQuantity)]
 
@@ -100,6 +106,7 @@ router.patch('/items/:productId', async (req, res) => {
   try {
     const product = await findProductById(req.params.productId)
     if (!product) return res.status(404).json({ success: false, message: 'Product not found or unavailable' })
+    if (!hasStock(product, parsedQuantity)) return res.status(400).json({ success: false, message: `Only ${product.stock} item${product.stock === 1 ? '' : 's'} available` })
 
     const userId = getUserId(req)
     const cart = await findCartByUserId(userId)

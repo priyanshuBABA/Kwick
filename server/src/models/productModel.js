@@ -14,7 +14,7 @@ function getCollection() {
 }
 
 function buildFilter({ category, search } = {}) {
-  const filter = { available: true }
+  const filter = { vendorId: { $type: 'objectId' }, available: { $ne: false }, isAvailable: { $ne: false } }
   if (category) filter.category = { $regex: `^${escapeRegex(category.trim())}$`, $options: 'i' }
   if (search?.trim()) Object.assign(filter, buildTextSearchFilter(search, SEARCH_FIELDS))
   return filter
@@ -32,7 +32,42 @@ export async function listProducts({ page, limit, category, search }) {
 
 export async function findProductById(id) {
   if (!isValidProductId(id)) return null
-  return getCollection().findOne({ _id: new ObjectId(id), available: true })
+  return getCollection().findOne({ _id: new ObjectId(id), vendorId: { $type: 'objectId' }, available: { $ne: false }, isAvailable: { $ne: false } })
+}
+
+export async function findProductByIdForVendor(id, vendorId) {
+  if (!isValidProductId(id) || !ObjectId.isValid(vendorId)) return null
+  return getCollection().findOne({ _id: new ObjectId(id), vendorId: new ObjectId(vendorId) })
+}
+
+export async function listProductsByVendor(vendorId) {
+  return getCollection().find({ vendorId: new ObjectId(vendorId) }).sort({ createdAt: -1, name: 1 }).toArray()
+}
+
+export async function createProduct(product) {
+  const now = new Date()
+  const document = { ...product, createdAt: now, updatedAt: now }
+  const result = await getCollection().insertOne(document)
+  return { ...document, _id: result.insertedId }
+}
+
+export async function updateProductForVendor(id, vendorId, updates) {
+  if (!isValidProductId(id) || !ObjectId.isValid(vendorId)) return null
+  const result = await getCollection().findOneAndUpdate(
+    { _id: new ObjectId(id), vendorId: new ObjectId(vendorId) },
+    { $set: { ...updates, updatedAt: new Date() } },
+    { returnDocument: 'after' },
+  )
+  return result?.value || result || null
+}
+
+export async function deleteProductForVendor(id, vendorId) {
+  if (!isValidProductId(id) || !ObjectId.isValid(vendorId)) return null
+  return getCollection().findOneAndUpdate(
+    { _id: new ObjectId(id), vendorId: new ObjectId(vendorId) },
+    { $set: { available: false, isAvailable: false, updatedAt: new Date() } },
+    { returnDocument: 'after' },
+  ).then((result) => result?.value || result || null)
 }
 
 export async function ensureProductIndexes() {
@@ -57,4 +92,31 @@ export async function upsertProducts(products) {
       upsert: true,
     },
   })))
+}
+
+export async function reserveProductStock(items) {
+  const reserved = []
+  try {
+    for (const item of items) {
+      if (!Number.isInteger(item.quantity)) continue
+      const result = await getCollection().updateOne(
+        { _id: new ObjectId(item.productId), available: { $ne: false }, isAvailable: { $ne: false }, stock: { $gte: item.quantity } },
+        { $inc: { stock: -item.quantity }, $set: { updatedAt: new Date() } },
+      )
+      if (result.modifiedCount !== 1) throw new Error(`${item.name || 'A product'} is no longer available in the requested quantity.`)
+      await getCollection().updateOne({ _id: new ObjectId(item.productId), stock: { $lte: 0 } }, { $set: { available: false, isAvailable: false, updatedAt: new Date() } })
+      reserved.push(item)
+    }
+    return reserved
+  } catch (error) {
+    await restoreProductStock(reserved)
+    throw error
+  }
+}
+
+export async function restoreProductStock(items) {
+  await Promise.all(items.map((item) => getCollection().updateOne(
+    { _id: new ObjectId(item.productId) },
+    { $inc: { stock: item.quantity }, $set: { available: true, isAvailable: true, updatedAt: new Date() } },
+  )))
 }

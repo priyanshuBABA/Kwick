@@ -46,6 +46,11 @@ export const createOrder = (payload, token) => request('/api/orders', token, {
   body: JSON.stringify(payload),
 })
 
+export const estimateOrder = (payload, token) => request('/api/orders/estimate', token, {
+  method: 'POST',
+  body: JSON.stringify(payload),
+})
+
 export const getOrderById = async (id, token) => normalizeOrder(await request(`/api/orders/${encodeURIComponent(id)}`, token))
 
 export const getMyOrders = async (token) => (await request('/api/orders', token)).map(normalizeOrder)

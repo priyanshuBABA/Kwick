@@ -1,4 +1,4 @@
-const ADDRESS_FIELDS = ['name', 'phone', 'addressLine1', 'addressLine2', 'city', 'state', 'postalCode', 'landmark', 'formattedAddress']
+const ADDRESS_FIELDS = ['name', 'phone', 'addressLine1', 'addressLine2', 'city', 'state', 'postalCode', 'landmark', 'formattedAddress', 'placeId']
 const REQUIRED_ADDRESS_FIELDS = ['name', 'phone', 'addressLine1', 'city', 'state', 'postalCode']
 
 function normalizeCoordinate(value, field) {

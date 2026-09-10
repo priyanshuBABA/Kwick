@@ -12,6 +12,8 @@ import { useAuth } from '../context/AuthContext';
 import { useLocationContext } from '../context/LocationContext';
 import { getOffersByDomain } from '../utils/offersService';
 import { acceptRiderOrder, declineRiderOrder, getAvailableRiderOrders, getMyRiderOrders, updateRiderOrderStatus } from '../services/riderOrderApi';
+import RouteMap from '../components/RouteMap';
+import { updateRiderLocation } from '../services/riderLocationApi';
 
 /* ------------------------------------------------------------------ */
 /*  Design tokens — LIGHT THEME                                        */
@@ -751,6 +753,7 @@ function Orders({
   onDecline,
   onAdvanceStatus,
   statusUpdatingOrderId,
+  token,
 }) {
   const [filter, setFilter] = useState('All');
   const [query, setQuery] = useState('');
@@ -826,6 +829,9 @@ function Orders({
           </div>
           <InfoRow label="Delivery" value={order.shippingAddress?.formattedAddress || order.shippingAddress?.city || 'Address pending'} />
           <InfoRow label="Delivery coordinates" value={formatCoordinates(order.shippingAddress, 'Delivery coordinates unavailable')} />
+          <div className="mt-4"><RouteMap pickups={getPickupLocations(order)} delivery={order.shippingAddress} token={token} geometry={order.deliveryRoute?.geometry} height="h-64" /></div>
+          <InfoRow label="Road route" value={order.deliveryRoute ? `${order.deliveryRoute.distanceKm} km · ${order.deliveryRoute.durationMinutes} min` : 'Route unavailable'} />
+          <InfoRow label="Delivery fee" value={`₹${Number(order.deliveryFee || 0)}`} />
           <InfoRow label="Total" value={`₹${Number(order.total || 0)}`} />
           {nextStatus && (
             <Button
@@ -1172,6 +1178,17 @@ export default function KwickRiderPage() {
     }
   }, [loadRiderOrders, stage, token]);
 
+  React.useEffect(() => {
+    if (stage !== 'app' || !token || !online || !navigator.geolocation) return undefined;
+    let active = true;
+    const publish = () => navigator.geolocation.getCurrentPosition(({ coords }) => {
+      if (active) updateRiderLocation({ latitude: coords.latitude, longitude: coords.longitude, accuracy: coords.accuracy }, token).catch(() => {});
+    }, () => {}, { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 });
+    publish();
+    const interval = window.setInterval(publish, 60000);
+    return () => { active = false; window.clearInterval(interval); };
+  }, [online, stage, token]);
+
   const handleAuthed = (isNewUser) => {
     if (isNewUser) setStage('onboarding');
     else {
@@ -1278,6 +1295,7 @@ export default function KwickRiderPage() {
             onAccept={handleAcceptOrder}
             onAdvanceStatus={handleAdvanceStatus}
             statusUpdatingOrderId={statusUpdatingOrderId}
+            token={token}
           />
         )}
         {tab === 'profile' && <Profile rider={rider} onLogout={handleLogout} loc={loc} />}

@@ -1,8 +1,20 @@
 import { Router } from 'express'
 import { findProductById, isValidProductId, listProducts } from '../models/productModel.js'
+import { findVendorById } from '../models/userModel.js'
 import { buildPagination, parsePagination } from '../utils/catalogUtils.js'
 
 const router = Router()
+
+async function serializeCatalogProduct(product) {
+  if (!product) return null
+  const vendor = product.vendorId ? await findVendorById(product.vendorId) : null
+  return {
+    ...product,
+    _id: product._id.toString(),
+    vendorId: product.vendorId?.toString() || null,
+    ...(vendor ? { vendor: { businessName: vendor.vendorOnboarding?.businessName || vendor.name || 'Kwick vendor' } } : {}),
+  }
+}
 
 async function listHandler(req, res, category) {
   const pagination = parsePagination(req.query)
@@ -17,7 +29,7 @@ async function listHandler(req, res, category) {
     const result = await listProducts({ ...pagination, category, search })
     return res.json({
       success: true,
-      data: result.data,
+      data: await Promise.all(result.data.map(serializeCatalogProduct)),
       pagination: buildPagination(pagination.page, pagination.limit, result.total),
     })
   } catch {
@@ -37,7 +49,7 @@ router.get('/:id', async (req, res) => {
   try {
     const product = await findProductById(req.params.id)
     if (!product) return res.status(404).json({ success: false, message: 'Product not found' })
-    return res.json({ success: true, data: product })
+    return res.json({ success: true, data: await serializeCatalogProduct(product) })
   } catch {
     return res.status(500).json({ success: false, message: 'Unable to load product' })
   }

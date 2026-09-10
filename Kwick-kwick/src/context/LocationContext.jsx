@@ -131,7 +131,8 @@ export function LocationProvider({ children }) {
     refreshLocation: getCurrentLocation,
     selectAddress,
     clearLocation,
-  }), [currentLocation, loading, error, permission, getCurrentLocation, selectAddress, clearLocation])
+    saveLocation,
+  }), [currentLocation, loading, error, permission, getCurrentLocation, selectAddress, clearLocation, saveLocation])
 
   return <LocationContext.Provider value={value}>{children}</LocationContext.Provider>
 }

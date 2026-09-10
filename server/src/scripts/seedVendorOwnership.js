@@ -21,7 +21,7 @@ async function seedVendorOwnership() {
   const vendor = await db.collection('users').findOne({ _id: vendorId, roles: 'vendor' }, { projection: { _id: 1 } })
   if (!vendor) throw new Error('SEED_VENDOR_ID does not belong to an existing vendor user')
 
-  const productKeys = getCatalogKeys('SEED_VENDOR_PRODUCT_KEYS', 'product-ball-pen,product-maggi-bundle')
+  const productKeys = getCatalogKeys('SEED_VENDOR_PRODUCT_KEYS', 'product-fresh-tomatoes,product-ball-pen,product-maggi-bundle')
   const productResult = await db.collection('products').updateMany(
     { catalogKey: { $in: productKeys } },
     { $set: { vendorId, updatedAt: new Date() } },

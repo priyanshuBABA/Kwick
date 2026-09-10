@@ -4,6 +4,7 @@ import MobileFrame from '../../components/MobileFrame';
 import TopBar from '../../components/TopBar';
 import { useAuth } from '../../context/AuthContext';
 import { getOrderById } from '../../services/orderApi';
+import RouteMap from '../../components/RouteMap';
 import { AlertCircle, Bike, MapPin, Phone, RefreshCw } from 'lucide-react';
 
 const TRACKING_STEPS = [
@@ -145,30 +146,9 @@ const OrderTracking = () => {
         </div>
       ) : order ? (
         <>
-          <div className="relative mx-4 mt-2 h-48 overflow-hidden rounded-2xl border-2 border-slate-300 bg-slate-200">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.9)_0%,_rgba(148,163,184,0.18)_45%,_rgba(15,23,42,0.14)_100%)]" />
-            <div className="absolute inset-x-0 top-0 flex items-center justify-between px-4 py-3">
-              <div className="rounded-full bg-white/80 px-3 py-1 text-xs font-bold text-slate-700 backdrop-blur-sm">
-                {order.status ? order.status.replace(/_/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase()) : 'Tracking'}
-              </div>
-              <div className="rounded-full bg-white/80 px-3 py-1 text-xs font-bold text-slate-700 backdrop-blur-sm">
-                ETA unavailable
-              </div>
-            </div>
-
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-center text-slate-600">
-              <span className="text-3xl">🗺️</span>
-              <span className="text-sm font-bold">
-                {order.assignedRiderId ? 'Live location unavailable' : 'Rider assignment pending'}
-              </span>
-            </div>
-
-            <div className="absolute bottom-3 left-3 right-3 rounded-xl bg-white/80 px-3 py-2 text-xs text-slate-700 shadow-sm backdrop-blur-sm">
-              <div className="flex items-center gap-2 font-semibold">
-                <MapPin className="h-4 w-4 text-red-500" />
-                <span>{deliveryLocation}</span>
-              </div>
-            </div>
+          <div className="mx-4 mt-2 overflow-hidden rounded-2xl border-2 border-slate-300 bg-white">
+            <RouteMap pickups={order.pickupLocations || (order.pickupLocation ? [order.pickupLocation] : [])} delivery={order.shippingAddress} riderLocation={order.riderLocation} token={token} geometry={order.deliveryRoute?.geometry} height="h-56" />
+            <div className="flex items-center justify-between gap-3 px-4 py-3 text-xs font-semibold text-slate-600"><span>{deliveryLocation}</span><span>{order.deliveryRoute ? `${order.deliveryRoute.distanceKm} km · ${order.deliveryRoute.durationMinutes} min` : 'Route unavailable'}</span></div>
           </div>
 
           <div className="px-4 pb-12 pt-4">

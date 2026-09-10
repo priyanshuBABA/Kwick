@@ -6,6 +6,9 @@ import {
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { getVendorOrders, updateVendorOrderStatus } from "../services/vendorOrderApi";
+import { getVendorLocation, saveVendorLocation } from "../services/vendorProfileApi";
+import { createVendorProduct, deactivateVendorProduct, getVendorProducts, updateVendorProduct } from "../services/vendorProductApi";
+import MapLocationPicker from "../components/MapLocationPicker";
 
 const amberGrad = "linear-gradient(135deg,#FFD54A,#F5A623)";
 
@@ -146,7 +149,7 @@ function OrdersPage({ orders, loading, error, onRetry, onStatusUpdate, updatingO
   const statusLabel = { placed: "Placed", confirmed: "Confirmed", preparing: "Preparing", ready: "Ready" };
 
   const orderItems = (order) => order.items.map((item) => (
-    <span key={item.productId} className="block">{item.label}</span>
+    <span key={item.productId} className="block">{item.name}</span>
   ));
 
   if (loading) return <div className="px-5 pt-6 pb-6"><SectionTitle>Orders</SectionTitle><EmptyState text="Loading vendor orders..." /></div>;
@@ -303,6 +306,126 @@ function EarningsPage() {
   );
 }
 
+function VendorLocationCard() {
+  const { token } = useAuth();
+  const [location, setLocation] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState('');
+
+  useEffect(() => {
+    let active = true;
+    getVendorLocation(token)
+      .then((value) => { if (active) setLocation(value); })
+      .catch((error) => { if (active) setMessage(error.message || 'Unable to load shop location'); })
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, [token]);
+
+  const updateField = (field, value) => setLocation((current) => ({ ...(current || {}), [field]: value }));
+  const save = async () => {
+    if (!location?.businessName?.trim() || !location?.city?.trim() || !location?.address?.trim() || !Number.isFinite(Number(location.latitude)) || !Number.isFinite(Number(location.longitude))) {
+      setMessage('Business name, city, address, and a map-selected pickup location are required.');
+      return;
+    }
+    setSaving(true);
+    setMessage('');
+    try {
+      setLocation(await saveVendorLocation({ ...location, latitude: Number(location.latitude), longitude: Number(location.longitude) }, token));
+      setMessage('Pickup location saved.');
+    } catch (error) {
+      setMessage(error.message || 'Unable to save pickup location');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) return <div className="mb-5 rounded-2xl border border-amber-100 bg-white p-5 text-sm font-semibold text-slate-500">Loading pickup location...</div>;
+  return (
+    <div className="mb-5 space-y-4 rounded-2xl border border-amber-100 bg-white p-5 shadow-sm">
+      <div><h3 className="font-black text-slate-900">Real shop pickup location</h3><p className="mt-1 text-xs text-slate-500">Customers and riders use this verified location for delivery routes.</p></div>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <input value={location?.businessName || ''} onChange={(event) => updateField('businessName', event.target.value)} placeholder="Business name" className="rounded-xl border border-slate-200 px-3 py-3 text-sm outline-none" />
+        <input value={location?.city || ''} onChange={(event) => updateField('city', event.target.value)} placeholder="City" className="rounded-xl border border-slate-200 px-3 py-3 text-sm outline-none" />
+      </div>
+      <MapLocationPicker value={location} onChange={(next) => setLocation((current) => ({ ...(current || {}), ...next, address: next.formattedAddress }))} title="Shop pickup location" required />
+      <input value={location?.address || ''} onChange={(event) => updateField('address', event.target.value)} placeholder="Verified shop address" className="w-full rounded-xl border border-slate-200 px-3 py-3 text-sm outline-none" />
+      {message && <p className="text-sm font-semibold text-slate-600">{message}</p>}
+      <button type="button" onClick={save} disabled={saving} className="w-full rounded-xl bg-slate-900 py-3 font-black text-white disabled:opacity-60">{saving ? 'Saving...' : 'Save pickup location'}</button>
+    </div>
+  );
+}
+
+const emptyProduct = { name: '', description: '', category: '', price: '', stock: '', image: '', isAvailable: true };
+
+function ProductsPage() {
+  const { token } = useAuth();
+  const [products, setProducts] = useState([]);
+  const [form, setForm] = useState(emptyProduct);
+  const [editingId, setEditingId] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState('');
+
+  const loadProducts = useCallback(async () => {
+    try {
+      setProducts(await getVendorProducts(token));
+    } catch (error) {
+      setMessage(error.message || 'Unable to load products');
+    } finally {
+      setLoading(false);
+    }
+  }, [token]);
+
+  useEffect(() => { loadProducts(); }, [loadProducts]);
+
+  const updateField = (field, value) => setForm((current) => ({ ...current, [field]: value }));
+  const resetForm = () => { setForm(emptyProduct); setEditingId(null); };
+  const submit = async (event) => {
+    event.preventDefault();
+    setSaving(true);
+    setMessage('');
+    try {
+      const payload = { ...form, price: Number(form.price), stock: Number(form.stock) };
+      if (editingId) await updateVendorProduct(editingId, payload, token);
+      else await createVendorProduct(payload, token);
+      resetForm();
+      await loadProducts();
+      setMessage(editingId ? 'Product updated.' : 'Product added to the catalog.');
+    } catch (error) {
+      setMessage(error.message || 'Unable to save product');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const edit = (product) => {
+    setEditingId(product._id);
+    setForm({ name: product.name || '', description: product.description || '', category: product.category || '', price: product.price ?? '', stock: product.stock ?? '', image: product.image || '', isAvailable: product.isAvailable !== false && product.available !== false });
+  };
+
+  const deactivate = async (id) => {
+    try { await deactivateVendorProduct(id, token); await loadProducts(); setMessage('Product deactivated.'); } catch (error) { setMessage(error.message || 'Unable to deactivate product'); }
+  };
+
+  return (
+    <div className="space-y-5 px-5 pt-6 pb-6">
+      <div className="flex items-center justify-between"><SectionTitle>Products</SectionTitle>{editingId && <button type="button" onClick={resetForm} className="text-sm font-bold text-slate-500">Cancel edit</button>}</div>
+      <form onSubmit={submit} className="space-y-3 rounded-2xl border border-amber-100 bg-white p-5 shadow-sm">
+        <h3 className="font-black text-slate-900">{editingId ? 'Edit product' : 'Add product'}</h3>
+        <input required value={form.name} onChange={(event) => updateField('name', event.target.value)} placeholder="Product name" className="w-full rounded-xl border border-slate-200 px-3 py-3 text-sm" />
+        <textarea value={form.description} onChange={(event) => updateField('description', event.target.value)} placeholder="Description" className="w-full rounded-xl border border-slate-200 px-3 py-3 text-sm" rows="2" />
+        <div className="grid gap-3 sm:grid-cols-3"><input required value={form.category} onChange={(event) => updateField('category', event.target.value)} placeholder="Category" className="rounded-xl border border-slate-200 px-3 py-3 text-sm" /><input required min="0.01" step="0.01" type="number" value={form.price} onChange={(event) => updateField('price', event.target.value)} placeholder="Price" className="rounded-xl border border-slate-200 px-3 py-3 text-sm" /><input required min="0" step="1" type="number" value={form.stock} onChange={(event) => updateField('stock', event.target.value)} placeholder="Stock" className="rounded-xl border border-slate-200 px-3 py-3 text-sm" /></div>
+        <input type="url" value={form.image} onChange={(event) => updateField('image', event.target.value)} placeholder="Image URL (optional)" className="w-full rounded-xl border border-slate-200 px-3 py-3 text-sm" />
+        <label className="flex items-center gap-2 text-sm font-semibold text-slate-700"><input type="checkbox" checked={form.isAvailable} onChange={(event) => updateField('isAvailable', event.target.checked)} /> Available for customers</label>
+        <button disabled={saving} className="w-full rounded-xl bg-slate-900 py-3 font-black text-white disabled:opacity-60">{saving ? 'Saving...' : editingId ? 'Update product' : 'Add product'}</button>
+      </form>
+      {message && <p className="rounded-xl bg-amber-50 px-4 py-3 text-sm font-semibold text-slate-700">{message}</p>}
+      {loading ? <EmptyState text="Loading products..." /> : products.length === 0 ? <EmptyState text="No products yet." /> : <div className="space-y-3">{products.map((product) => <div key={product._id} className="flex items-center gap-3 rounded-2xl border border-amber-100 bg-white p-4 shadow-sm"><div className="h-14 w-14 overflow-hidden rounded-xl bg-slate-100">{product.image ? <img src={product.image} alt="" className="h-full w-full object-cover" /> : <span className="flex h-full items-center justify-center text-2xl">📦</span>}</div><div className="min-w-0 flex-1"><p className="font-black text-slate-900">{product.name}</p><p className="text-xs text-slate-500">₹{product.price} · Stock {product.stock} · {product.available === false || product.isAvailable === false ? 'Inactive' : 'Active'}</p></div><button type="button" onClick={() => edit(product)} className="rounded-xl bg-slate-100 px-3 py-2 text-xs font-bold">Edit</button><button type="button" onClick={() => deactivate(product._id)} className="rounded-xl bg-red-50 px-3 py-2 text-xs font-bold text-red-600">Deactivate</button></div>)}</div>}
+    </div>
+  );
+}
+
 function ProfilePage({ onLogout }) {
   const rows = [
     { icon: Edit3, label: "Edit Store Details", desc: "Name, photo, timings" },
@@ -313,6 +436,8 @@ function ProfilePage({ onLogout }) {
   return (
     <div className="px-5 pt-6 pb-6">
       <SectionTitle>Profile</SectionTitle>
+
+      <VendorLocationCard />
 
       <div className="bg-white rounded-2xl p-5 border border-amber-100 shadow-sm flex items-center gap-4 mb-5">
         <button className="relative h-16 w-16 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
@@ -393,6 +518,7 @@ export default function KwickVendorDashboard({ onLogout }) {
 
   const navItems = [
     { name: "Home", Icon: Store },
+    { name: "Products", Icon: ListChecks },
     { name: "Orders", Icon: Package },
     { name: "Earnings", Icon: Wallet },
     { name: "Profile", Icon: User },
@@ -410,6 +536,7 @@ export default function KwickVendorDashboard({ onLogout }) {
             onGoOrders={() => setTab("Orders")}
           />
         )}
+        {tab === "Products" && <ProductsPage />}
         {tab === "Orders" && (
           <OrdersPage
             orders={orders}

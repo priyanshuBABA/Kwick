@@ -31,6 +31,7 @@ export function normalizeProduct(product) {
     emoji: product.emoji || product.e || '📦',
     unit: product.unit || product.weight || '',
     category: product.category || '',
+    vendorName: product.vendor?.businessName || product.vendor?.name || '',
   }
 }
 

@@ -38,6 +38,7 @@ import KwickWalletPage from './customer/pages/WalletPageComplete';
 import ProfileOptionPage from './customer/pages/ProfileOptionPage';
 import KwickNotificationsPage from './customer/pages/KwickNotificationsPage';
 import PaymentPage from './customer/pages/PaymentPage';
+import ProductDetailPage from './customer/pages/ProductDetailPage';
 
 // Rider and Vendor pages have been removed — landing page will show role options only
 
@@ -100,6 +101,7 @@ const App = () => {
       <Route path="/customer/home" element={<CustomerHome />} />
       <Route path="/customer/cart" element={<CustomerCart />} />
       <Route path="/customer/payment" element={<PaymentPage />} />
+      <Route path="/customer/products/:id" element={<ProductDetailPage />} />
       <Route path="/customer/orders" element={<CustomerOrders />} />
       <Route path="/customer/profile" element={<CustomerProfile />} />
       <Route path="/customer/profile/become-rider" element={<ProtectedRoute role="customer"><BecomeRider /></ProtectedRoute>} />

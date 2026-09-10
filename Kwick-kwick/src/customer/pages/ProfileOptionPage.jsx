@@ -37,6 +37,7 @@ import {
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import BottomNav from '../../components/BottomNav';
+import { useAuth } from '../../context/AuthContext';
 
 const navItems = [
   { icon: Home, label: 'Home', path: '/customer/home' },
@@ -127,6 +128,7 @@ function ToggleRow({ label, sublabel, checked, onChange }) {
 
 export default function ProfileOptionPage() {
   const navigate = useNavigate();
+  const { logout } = useAuth();
   const location = useLocation();
   const [notice, setNotice] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
@@ -169,7 +171,7 @@ export default function ProfileOptionPage() {
   );
 
   const handleLogout = () => {
-    localStorage.clear();
+    logout();
     navigate('/role-selection', { replace: true });
   };
 
@@ -482,7 +484,7 @@ export default function ProfileOptionPage() {
                   <p className="text-xs font-bold uppercase tracking-[0.2em] text-orange-500">Logged in devices</p>
                   <h3 className="mt-1 text-lg font-black text-slate-900">Active sessions</h3>
                 </div>
-                <button type="button" className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-bold text-red-600">Log out of all devices</button>
+                <button type="button" onClick={handleLogout} className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-bold text-red-600">Log out of all devices</button>
               </div>
               <div className="mt-4 space-y-3">
                 {[

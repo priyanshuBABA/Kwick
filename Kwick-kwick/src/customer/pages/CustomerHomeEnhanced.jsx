@@ -14,7 +14,6 @@ import { useLocationContext } from '../../context/LocationContext';
 const CustomerHomeEnhanced = () => {
   const navigate = useNavigate();
   const { addToCart } = useCart();
-  const [cartCount, setCartCount] = useState(3);
   const [currentBanner, setCurrentBanner] = useState(0);
   const [toast, setToast] = useState(null);
   const [catalogProducts, setCatalogProducts] = useState([]);
@@ -54,10 +53,13 @@ const CustomerHomeEnhanced = () => {
     setTimeout(() => setToast(null), 2500);
   };
 
-  const handleAddToCart = (product) => {
-    addToCart({ ...product, quantity: 1 });
-    setCartCount(cartCount + 1);
-    showToast(`✅ ${product.name} added to cart`);
+  const handleAddToCart = async (product) => {
+    try {
+      await addToCart({ ...product, quantity: 1 });
+      showToast(`${product.name} added to cart`);
+    } catch (error) {
+      showToast(error.message || 'Unable to add product to cart');
+    }
   };
 
   const banners = [
@@ -271,7 +273,7 @@ const CustomerHomeEnhanced = () => {
                         <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-2xl shadow-sm">{product.image ? <img src={product.image} alt="" className="h-full w-full rounded-2xl object-cover" /> : product.emoji}</div>
                         <div className="min-w-0 flex-1">
                           <p className="truncate text-sm font-bold text-slate-800">{product.name}</p>
-                          <p className="mt-1 text-xs text-slate-500">{product.unit || product.category}</p>
+                          <p className="mt-1 text-xs text-slate-500">{product.vendor?.businessName || product.vendor?.name || product.unit || product.category}</p>
                         </div>
                         <div className="text-right">
                           <p className="text-base font-black text-orange-500">₹{product.price}</p>
@@ -292,7 +294,7 @@ const CustomerHomeEnhanced = () => {
                   <div className="grid grid-cols-2 gap-3">
                     {catalogMessage && <p className="col-span-2 rounded-2xl bg-slate-50 p-4 text-sm font-semibold text-slate-500">{catalogMessage}</p>}
                     {trendingProducts.map((product) => (
-                      <button key={product.id} onClick={() => handleAddToCart(product)} className="rounded-2xl border border-slate-200 bg-slate-50 p-3 text-left transition hover:border-orange-200 hover:bg-orange-50">
+                      <button key={product.id} onClick={() => navigate(`/customer/products/${product.id}`)} className="rounded-2xl border border-slate-200 bg-slate-50 p-3 text-left transition hover:border-orange-200 hover:bg-orange-50">
                         <div className="text-2xl">{product.image ? <img src={product.image} alt="" className="h-8 w-8 rounded object-cover" /> : product.emoji}</div>
                         <p className="mt-2 text-sm font-bold text-slate-800">{product.name}</p>
                         <div className="mt-2 flex items-center justify-between">

@@ -100,6 +100,15 @@ export async function updateVendorLocation(id, location) {
   return findUserById(id)
 }
 
+export async function updateRiderLocation(id, location) {
+  if (!ObjectId.isValid(id)) return null
+  await getDB().collection('users').updateOne(
+    { _id: new ObjectId(id), $or: [{ roles: 'rider' }, { role: 'rider' }] },
+    { $set: { riderLocation: { latitude: location.latitude, longitude: location.longitude, accuracy: location.accuracy ?? null, updatedAt: new Date() }, updatedAt: new Date() } },
+  )
+  return findUserById(id)
+}
+
 export async function findVendorById(id) {
   if (!ObjectId.isValid(id)) return null
   return getDB().collection('users').findOne({

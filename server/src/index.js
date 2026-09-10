@@ -10,8 +10,10 @@ import serviceRoutes from './routes/serviceRoutes.js'
 import cartRoutes from './routes/cartRoutes.js'
 import orderRoutes from './routes/orderRoutes.js'
 import riderOrderRoutes from './routes/riderOrderRoutes.js'
+import riderRoutes from './routes/riderRoutes.js'
 import vendorOrderRoutes from './routes/vendorOrderRoutes.js'
 import vendorProfileRoutes from './routes/vendorProfileRoutes.js'
+import vendorProductRoutes from './routes/vendorProductRoutes.js'
 
 const app = express()
 const port = Number(process.env.PORT) || 5000
@@ -44,8 +46,10 @@ app.use('/api/services', serviceRoutes)
 app.use('/api/cart', cartRoutes)
 app.use('/api/orders', orderRoutes)
 app.use('/api/rider/orders', riderOrderRoutes)
+app.use('/api/rider', riderRoutes)
 app.use('/api/vendor/orders', vendorOrderRoutes)
 app.use('/api/vendor/profile', vendorProfileRoutes)
+app.use('/api/vendor/products', vendorProductRoutes)
 
 app.use((_req, res) => {
   res.status(404).json({ success: false, message: 'Route not found' })

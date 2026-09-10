@@ -1,95 +1,54 @@
-import { ObjectId } from 'mongodb'
 import { Router } from 'express'
 import { requireAuth } from '../middleware/authMiddleware.js'
-import { clearCartForUser, findCartByUserId } from '../models/cartModel.js'
-import { findProductById } from '../models/productModel.js'
+import { clearCartForUser } from '../models/cartModel.js'
 import {
   createOrder,
   findOrderById,
   findOrdersByUser,
+  serializeCustomerOrder,
   serializeOrder,
 } from '../models/orderModel.js'
-import { findVendorById } from '../models/userModel.js'
 import { normalizeAddress } from '../utils/addressValidation.js'
-import { normalizeVendorLocation } from '../utils/vendorLocationValidation.js'
+import { buildOrderQuote } from '../utils/orderQuote.js'
+import { reserveProductStock, restoreProductStock } from '../models/productModel.js'
 
 const router = Router()
 router.use(requireAuth)
-
-function parseCartQuantity(value) {
-  return Number.isInteger(value) && value > 0 ? value : null
-}
 
 router.post('/', async (req, res) => {
   const body = req.body || {}
   let shippingAddress
   try {
     shippingAddress = normalizeAddress(body.shippingAddress)
+    if (!Number.isFinite(shippingAddress.latitude) || !Number.isFinite(shippingAddress.longitude)) {
+      return res.status(400).json({ success: false, message: 'A map-selected delivery location is required' })
+    }
   } catch (error) {
     return res.status(400).json({ success: false, message: error.message })
   }
 
   try {
     const userId = req.user._id
-    const cart = await findCartByUserId(userId)
-    if (!cart?.items?.length) {
-      return res.status(400).json({ success: false, message: 'Cart is empty' })
+    let quote
+    try {
+      quote = await buildOrderQuote(userId, shippingAddress)
+    } catch (error) {
+      const status = /route provider|no road route|road route was unavailable/i.test(error.message) ? 502 : 400
+      return res.status(status).json({ success: false, message: error.message })
     }
-
-    const items = []
-    for (const cartItem of cart.items) {
-      const quantity = parseCartQuantity(cartItem.quantity)
-      if (!quantity) {
-        return res.status(400).json({ success: false, message: 'Cart contains an invalid quantity' })
-      }
-
-      const product = await findProductById(cartItem.productId)
-      if (!product) {
-        return res.status(404).json({ success: false, message: 'A cart product is unavailable' })
-      }
-      if (!product.name || !Number.isFinite(Number(product.price)) || Number(product.price) < 0) {
-        return res.status(400).json({ success: false, message: 'A cart product has incomplete pricing data' })
-      }
-
-      const price = Number(product.price)
-      const orderItem = {
-        productId: product._id,
-        name: product.name,
-        image: product.image || null,
-        unit: product.unit || product.weight || '',
-        quantity,
-        price,
-        lineTotal: price * quantity,
-      }
-      if (product.vendorId && ObjectId.isValid(product.vendorId)) orderItem.vendorId = new ObjectId(product.vendorId)
-      items.push(orderItem)
+    const { items, pickupLocations, subtotal, deliveryFee, deliveryRoute } = quote
+    let reservedItems
+    try {
+      reservedItems = await reserveProductStock(items)
+    } catch (error) {
+      return res.status(400).json({ success: false, message: error.message })
     }
-
-    const vendorIds = [...new Set(items.filter((item) => item.vendorId).map((item) => item.vendorId.toString()))]
-    const pickupLocations = []
-    for (const vendorId of vendorIds) {
-      const vendor = await findVendorById(vendorId)
-      if (!vendor) return res.status(400).json({ success: false, message: 'A cart vendor account is unavailable' })
-      try {
-        const location = normalizeVendorLocation({
-          businessName: vendor.vendorOnboarding?.businessName,
-          city: vendor.vendorOnboarding?.city,
-          address: vendor.vendorOnboarding?.address,
-          latitude: vendor.vendorOnboarding?.latitude,
-          longitude: vendor.vendorOnboarding?.longitude,
-        })
-        pickupLocations.push({ vendorId: new ObjectId(vendorId), ...location })
-      } catch {
-        return res.status(400).json({ success: false, message: `Vendor pickup location is not configured for ${vendor.vendorOnboarding?.businessName || 'this vendor'}.` })
-      }
-    }
-
-    const subtotal = items.reduce((sum, item) => sum + item.lineTotal, 0)
-    const deliveryFee = 0
     const tax = 0
     const discount = 0
     const total = Math.max(0, subtotal + deliveryFee + tax - discount)
-    const order = await createOrder({
+    let order
+    try {
+      order = await createOrder({
       userId,
       items,
       subtotal,
@@ -102,26 +61,47 @@ router.post('/', async (req, res) => {
       riderStatus: 'unassigned',
       pickupLocation: pickupLocations.length === 1 ? pickupLocations[0] : null,
       pickupLocations,
+      deliveryRoute: {
+        distanceKm: deliveryRoute.distanceKm,
+        durationMinutes: deliveryRoute.durationMinutes,
+        calculatedAt: new Date(),
+        provider: deliveryRoute.provider,
+      },
       paymentStatus: 'pending',
       paymentMethod: typeof body.paymentMethod === 'string' ? body.paymentMethod : null,
       shippingAddress,
-    })
+      })
+    } catch (error) {
+      await restoreProductStock(reservedItems)
+      throw error
+    }
 
     await clearCartForUser(userId)
     return res.status(201).json({
       success: true,
       message: 'Order created successfully',
-      data: serializeOrder(order),
+      data: await serializeCustomerOrder(order),
     })
   } catch {
     return res.status(500).json({ success: false, message: 'Unable to create order' })
   }
 })
 
+router.post('/estimate', async (req, res) => {
+  try {
+    const shippingAddress = normalizeAddress(req.body?.shippingAddress)
+    if (!Number.isFinite(shippingAddress.latitude) || !Number.isFinite(shippingAddress.longitude)) return res.status(400).json({ success: false, message: 'A map-selected delivery location is required' })
+    const quote = await buildOrderQuote(req.user._id, shippingAddress)
+    return res.json({ success: true, data: { subtotal: quote.subtotal, deliveryFee: quote.deliveryFee, total: quote.subtotal + quote.deliveryFee, deliveryRoute: quote.deliveryRoute } })
+  } catch (error) {
+    return res.status(/route provider|no road route|road route was unavailable/i.test(error.message) ? 502 : 400).json({ success: false, message: error.message })
+  }
+})
+
 router.get('/', async (req, res) => {
   try {
     const orders = await findOrdersByUser(req.user._id)
-    return res.json({ success: true, data: orders.map(serializeOrder) })
+    return res.json({ success: true, data: await Promise.all(orders.map(serializeCustomerOrder)) })
   } catch {
     return res.status(500).json({ success: false, message: 'Unable to load orders' })
   }
@@ -131,7 +111,7 @@ router.get('/:id', async (req, res) => {
   try {
     const order = await findOrderById(req.params.id, req.user._id)
     if (!order) return res.status(404).json({ success: false, message: 'Order not found' })
-    return res.json({ success: true, data: serializeOrder(order) })
+    return res.json({ success: true, data: await serializeCustomerOrder(order) })
   } catch {
     return res.status(500).json({ success: false, message: 'Unable to load order' })
   }
